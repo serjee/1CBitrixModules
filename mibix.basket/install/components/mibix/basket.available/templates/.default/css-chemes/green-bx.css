@@ -1,0 +1,185 @@
+/*===================================*/
+/*       Цветовая схема (Black)      */
+/*===================================*/
+
+/* Панель и ее градиент */
+.mbx-basket_bottom-panel-i {
+    color: #9fa1a3;
+    border-top: 1px solid #557934;
+    box-shadow: inset 0 1px 0 0 #d3eb8e;
+    background: #90cd59;
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIxJSIgc3RvcC1jb2xvcj0iIzkwY2Q1OSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2NWEyMmUiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+    background: -moz-linear-gradient(top, #90cd59 1%, #65a22e 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#90cd59), color-stop(100%,#65a22e));
+    background: -webkit-linear-gradient(top, #90cd59 1%,#65a22e 100%);
+    background: -o-linear-gradient(top, #90cd59 1%,#65a22e 100%);
+    background: -ms-linear-gradient(top, #90cd59 1%,#65a22e 100%);
+    background: linear-gradient(to bottom, #90cd59 1%,#65a22e 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#90cd59', endColorstr='#65a22e',GradientType=0 );
+}
+
+/* Общие стили для ссылкок правой части панели */
+.mbx-basket_cart-short li a {
+    color: #fff;
+}
+.mbx-basket_cart-short li a:hover {
+    color: #297509;
+}
+
+/* Общее количество товара при неактивной корзине */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .count {
+    background: #cdeb8b;
+    color: #9fa2a7;
+    -moz-box-shadow: 0 0 4px #083F00 inset;
+    -webkit-box-shadow: 0 0 4px #083F00 inset;
+    box-shadow: 0 0 4px #083F00 inset;
+}
+
+/* Общее количество товара при активной корзине */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .active .count {
+    background: #299a0b;
+    color: #fff;
+}
+
+/* Цвет подчеркивания для активной и неактивной ссылки Корзина */
+.mbx-basket_bottom-panel ul.mbx-basket_cart-short li a .g-underline {
+    border-bottom: 1px dashed #fff;
+}
+.mbx-basket_bottom-panel ul.mbx-basket_cart-short li a:hover .g-underline {
+    border-bottom: 1px solid #297509;
+}
+
+/* Цвет ссылок Корзина и Сравнить, если в них нет товара */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a .g-underline.fade,
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a.active .g-underline.fade {
+    color: #cdeb8b;
+    border-color: #cdeb8b;
+}
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a:hover .g-underline.fade {
+    color:#006e2e;
+    border-bottom: 1px solid #006e2e;
+}
+
+/* Общая сумма корзины */
+.mbx-basket_cart-short .num {
+    color: #fff;
+}
+
+/* Цвет текста общей суммы корзины, когда она пуста */
+.mbx-basket_cart-short .empty {
+    color: #cdeb8b;
+}
+
+/* Ссылки Регистрации/Выход */
+.mbx-basket_bottom-panel .logout,
+.mbx-basket_bottom-panel .signup {
+    color:#fff !important;
+}
+
+/* Выпадающий список товаров */
+.mbx-basket_cart-short .cart_view {
+    box-shadow:0 2px 5px 0 rgba(0,0,0,.18);
+    border:1px solid #d3d3d3;
+    background:#fff;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions a {
+    color: #105E06;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions a:hover {
+    color:#4c4a3f;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .quantity_count a {
+    background: url('../images/arrows.png') no-repeat scroll 0 0 transparent;
+    border: 1px solid #D8D8D8;
+}
+
+/* Кнопка Оформления заказа */
+.mbx-basket_bottom-panel .bt1 {
+    background: #299a0b; /* Old browsers */
+    /* IE9 SVG, needs conditional override of 'filter' to 'none' */
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzI5OWEwYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMyOTlhMGIiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+    background: -moz-linear-gradient(top,  #299a0b 0%, #299a0b 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#299a0b), color-stop(100%,#299a0b)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #299a0b 0%,#299a0b 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #299a0b 0%,#299a0b 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #299a0b 0%,#299a0b 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #299a0b 0%,#299a0b 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#299a0b', endColorstr='#299a0b',GradientType=0 ); /* IE6-8 */
+    color:#fff;
+    text-shadow:0 1px 1px #60782d;
+    /*box-shadow:inset 0 1px 1px 0 #083F00*/
+    box-shadow:0 1px 1px 0 #083F00;
+}
+.mbx-basket_bottom-panel .bt1 span{
+    background:url("../images/cart_white.png");
+    color:#4c4a3f;
+}
+.mbx-basket_bottom-panel .bt1:hover,
+.mbx-basket_bottom-panel .bt1:active {
+    color:#fff;
+    background: #299a0b; /* Old browsers */
+    /* IE9 SVG, needs conditional override of 'filter' to 'none' */
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzI5OWEwYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMyOTlhMGIiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+    background: -moz-linear-gradient(top,  #299a0b 0%, #299a0b 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#299a0b), color-stop(100%,#299a0b)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #299a0b 0%,#299a0b 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #299a0b 0%,#299a0b 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #299a0b 0%,#299a0b 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #299a0b 0%,#299a0b 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#299a0b', endColorstr='#299a0b',GradientType=0 ); /* IE6-8 */
+}
+.mbx-basket_bottom-panel .bt1._disabled,
+.mbx-basket_bottom-panel .bt1._disabled:hover,
+.mbx-basket_bottom-panel .bt1._disabled:active {
+    border-color: #767a81 !important;
+    color: #b1b4b8 !important;
+    background: #cdeb8b; /* Old browsers */
+    /* IE9 SVG, needs conditional override of 'filter' to 'none' */
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2NkZWI4YiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNjZGViOGIiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+    background: -moz-linear-gradient(top,  #cdeb8b 0%, #cdeb8b 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cdeb8b), color-stop(100%,#cdeb8b)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #cdeb8b 0%,#cdeb8b 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #cdeb8b 0%,#cdeb8b 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #cdeb8b 0%,#cdeb8b 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #cdeb8b 0%,#cdeb8b 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8b', endColorstr='#cdeb8b',GradientType=0 ); /* IE6-8 */
+    box-shadow:inset 0 1px 1px 0 #083F00;
+}
+.mbx-basket_bottom-panel .bt1._disabled span {
+    background:url("../images/cart_empty.png") no-repeat;
+    color: #9fa2a7 !important;
+}
+
+/* Кнопка Кабинета/Авторизации */
+.mbx-basket_bottom-panel .bt2 {
+    color:#3f3f3f;
+    box-shadow:0 1px 2px 1px rgba(0,0,0,0.4);
+    text-shadow:0 1px 1px #fff;
+    background:#eee;
+    background:-moz-linear-gradient(top,#eee 0%,#fff 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#eee),color-stop(100%,#fff));
+    background:-webkit-linear-gradient(top,#eee 0%,#fff 100%);
+    background:-o-linear-gradient(top,#eee 0%,#fff 100%);
+    background:-ms-linear-gradient(top,#eee 0%,#fff 100%);
+    background:linear-gradient(to bottom,#eee 0%,#fff 100%);
+}
+.mbx-basket_bottom-panel .bt2:hover {
+    color:#3f3f3f;
+    background:#fbfbfb;
+}
+.mbx-basket_bottom-panel .bt2:active {
+    color:#3f3f3f;
+    text-shadow:0 2px 1px white;
+    background:#fbfbfb;
+    background:-moz-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:-webkit-gradient(radial,center center,0px,center center,100%,color-stop(0%,#fbfbfb),color-stop(100%,#eaeaea));
+    background:-webkit-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:-o-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:-ms-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:radial-gradient(ellipse at center,#fbfbfb 0%,#eaeaea 100%);
+    border:1px solid #d2d2d2
+}
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .scroll_arrow {
+    background:url("../images/scrollup_green.png");
+}
+/*===================================*/

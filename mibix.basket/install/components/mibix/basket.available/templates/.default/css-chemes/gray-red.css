@@ -1,0 +1,169 @@
+/*===================================*/
+/*       Цветовая схема (Black)      */
+/*===================================*/
+
+/* Панель и ее градиент */
+.mbx-basket_bottom-panel-i {
+    color: #9fa1a3;
+    background: #4e5258;
+    border-top: 1px solid #92969b;
+    background: linear-gradient(top, #4e5258 0%, #32363a 100%);
+    background: -o-linear-gradient(top, #4e5258 0%, #32363a 100%);
+    background: -moz-linear-gradient(top, #4e5258 0%, #32363a 100%);
+    background: -webkit-linear-gradient(top, #4e5258 0%, #32363a 100%);
+    background: -ms-linear-gradient(top, #4e5258 0%, #32363a 100%);
+    -pie-background: linear-gradient(top, #4e5258 0%, #32363a 100%);
+    background: -webkit-gradient( linear, left top, left bottom, color-stop(0, #4e5258), color-stop(1, #32363a) );
+}
+
+/* Общие стили для ссылкок правой части панели */
+.mbx-basket_cart-short li a {
+    color: #fff;
+}
+.mbx-basket_cart-short li a:hover {
+    color: #f2362f;
+}
+
+/* Общее количество товара при неактивной корзине */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .count {
+    background: #767a81;
+    color: #9fa2a7;
+    -moz-box-shadow: 0 0 4px rgba(0,0,0,.5) inset;
+    -webkit-box-shadow: 0 0 4px rgba(0,0,0,.5) inset;
+    box-shadow: 0 0 4px rgba(0,0,0,.5) inset;
+}
+
+/* Общее количество товара при активной корзине */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .active .count {
+    background: #f2362f;
+    color: #fff;
+}
+
+/* Цвет подчеркивания для активной и неактивной ссылки Корзина */
+.mbx-basket_bottom-panel ul.mbx-basket_cart-short li a .g-underline {
+    border-color: rgba(255,255,255,.3);
+}
+.mbx-basket_bottom-panel ul.mbx-basket_cart-short li a:hover .g-underline {
+    border-color: rgba(242,54,47,.3);
+}
+
+/* Цвет ссылок Корзина и Сравнить, если в них нет товара */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a .g-underline.fade,
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a.active .g-underline.fade {
+    color: #9fa1a4;
+    border-color: #9fa1a4;
+}
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a:hover .g-underline.fade {
+    color:#f2362f;
+    border-color: rgba(242,54,47,.3);
+}
+
+/* Общая сумма корзины */
+.mbx-basket_cart-short .num {
+    color: #fff;
+}
+
+/* Цвет текста общей суммы корзины, когда она пуста */
+.mbx-basket_cart-short .empty {
+    color: #9fa2a7;
+}
+
+/* Ссылки Регистрации/Выход */
+.mbx-basket_bottom-panel .logout,
+.mbx-basket_bottom-panel .signup {
+    color:#fff !important;
+}
+
+/* Выпадающий список товаров */
+.mbx-basket_cart-short .cart_view {
+    box-shadow:0 2px 5px 0 rgba(0,0,0,.18);
+    border:1px solid #d3d3d3;
+    background:#fff;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions a {
+    color: #777;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions a:hover {
+    color:#a40000;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .quantity_count a {
+    background: url('../images/arrows.png') no-repeat scroll 0 0 transparent;
+    border: 1px solid #D8D8D8;
+}
+
+/* Кнопка Оформления заказа */
+.mbx-basket_bottom-panel .bt1 {
+    background: #fe4724;
+    background: linear-gradient(top,#fe4724 0,#d9221b 100%);
+    background: -o-linear-gradient(top,#fe4724 0,#d9221b 100%);
+    background: -moz-linear-gradient(top,#fe4724 0,#d9221b 100%);
+    background: -webkit-linear-gradient(top,#fe4724 0,#d9221b 100%);
+    background: -ms-linear-gradient(top,#fe4724 0,#d9221b 100%);
+    -pie-background: linear-gradient(top,#fe4724 0,#d9221b 100%);
+    background: -webkit-gradient(linear,left top,left bottom,color-stop(0,#fe4724),color-stop(1,#d9221b));
+    border-color: #fe8a74 #fe4724 #d9221b #fe4724;
+    color: #fff!important;
+    text-shadow: 0 1px 0 rgba(0,0,0,.17);
+}
+.mbx-basket_bottom-panel .bt1 span{
+    background:url("../images/cart_red.png");
+    color:#a40000;
+}
+.mbx-basket_bottom-panel .bt1:hover,
+.mbx-basket_bottom-panel .bt1:active {
+    color:#a40000;
+    background: #ff5c3c;
+    background: linear-gradient(top,#ff5b3c 0,#dc241c 100%);
+    background: -o-linear-gradient(top,#ff5b3c 0,#dc241c 100%);
+    background: -moz-linear-gradient(top,#ff5b3c 0,#dc241c 100%);
+    background: -webkit-linear-gradient(top,#ff5b3c 0,#dc241c 100%);
+    background: -ms-linear-gradient(top,#ff5b3c 0,#dc241c 100%);
+    -pie-background: linear-gradient(top,#ff5b3c 0,#dc241c 100%);
+    background: -webkit-gradient(linear,left top,left bottom,color-stop(0,#ff5b3c),color-stop(1,#dc241c));
+    border-color: #fe8a74 #ff5c3c #dc241c #ff5c3c;
+}
+.mbx-basket_bottom-panel .bt1._disabled,
+.mbx-basket_bottom-panel .bt1._disabled:hover,
+.mbx-basket_bottom-panel .bt1._disabled:active {
+    border-color: #767a81 !important;
+    background: #767a81 !important;
+    color: #9fa2a7 !important;
+}
+.mbx-basket_bottom-panel .bt1._disabled span {
+    background:url("../images/cart_empty.png") no-repeat;
+    color: #9fa2a7 !important;
+}
+
+/* Кнопка Кабинета/Авторизации */
+.mbx-basket_bottom-panel .bt2 {
+    color:#3f3f3f;
+    box-shadow:0 1px 2px 1px rgba(0,0,0,0.4);
+    text-shadow:0 1px 1px #fff;
+    background:#eee;
+    background:-moz-linear-gradient(top,#eee 0%,#fff 100%);
+    background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#eee),color-stop(100%,#fff));
+    background:-webkit-linear-gradient(top,#eee 0%,#fff 100%);
+    background:-o-linear-gradient(top,#eee 0%,#fff 100%);
+    background:-ms-linear-gradient(top,#eee 0%,#fff 100%);
+    background:linear-gradient(to bottom,#eee 0%,#fff 100%);
+}
+.mbx-basket_bottom-panel .bt2:hover {
+    color:#3f3f3f;
+    background:#fbfbfb;
+}
+.mbx-basket_bottom-panel .bt2:active {
+    color:#3f3f3f;
+    text-shadow:0 2px 1px white;
+    background:#fbfbfb;
+    background:-moz-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:-webkit-gradient(radial,center center,0px,center center,100%,color-stop(0%,#fbfbfb),color-stop(100%,#eaeaea));
+    background:-webkit-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:-o-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:-ms-radial-gradient(center,ellipse cover,#fbfbfb 0%,#eaeaea 100%);
+    background:radial-gradient(ellipse at center,#fbfbfb 0%,#eaeaea 100%);
+    border:1px solid #d2d2d2
+}
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .scroll_arrow {
+    background:url("../images/scrollup_black.png");
+}
+/*===================================*/

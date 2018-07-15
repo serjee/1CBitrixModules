@@ -1,0 +1,14 @@
+<?
+$MESS['MIBIX_BATTLE_COMPONENT_SETTINGS'] = "Настройки битвы";
+$MESS['MIBIX_BATTLE_COMPONENT_CODE_GROUP'] = "Символьный код группы";
+$MESS['MIBIX_BATTLE_COMPONENT_JQUERY_ENABLED'] = "Включить JQuery (если уже есть, то не нужно включать)";
+$MESS['MIBIX_BATTLE_COMPONENT_FANCYBOX_ENABLED'] = "Включить FancyBox для изображений (требует JQuery)";
+$MESS['MIBIX_BATTLE_COMPONENT_CHEMES'] = "Выбор цветовой схемы";
+
+$MESS['MIBIX_BATTLE_COMPONENT_COLOR_GRAY'] = "Серый";
+$MESS['MIBIX_BATTLE_COMPONENT_COLOR_BLUE'] = "Синий";
+$MESS['MIBIX_BATTLE_COMPONENT_GRAY_GREEN'] = "Зеленый";
+$MESS['MIBIX_BATTLE_COMPONENT_COLOR_BLUELIGHT'] = "Светло-синий";
+$MESS['MIBIX_BATTLE_COMPONENT_COLOR_YELLOW'] = "Желтый";
+$MESS['MIBIX_BATTLE_COMPONENT_COLOR_RED'] = "Красный";
+?>

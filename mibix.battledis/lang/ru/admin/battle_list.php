@@ -1,0 +1,30 @@
+<?
+$MESS["MIBIX_BATTLEDIS_BATTLE_TITLE"] = "Список источников данных";
+$MESS["MIBIX_BATTLEDIS_NAV"] = "Номера";
+$MESS["MIBIX_BATTLEDIS_POST_DATE_INSERT"] = "Добавлено";
+$MESS["MIBIX_BATTLEDIS_NAME_GROUP"] = "Название группы";
+$MESS["MIBIX_BATTLEDIS_NAME_BATTLE"] = "Название битвы";
+$MESS["MIBIX_BATTLEDIS_ACT"] = "Активность";
+$MESS["MIBIX_BATTLEDIS_POST_DATE_UPDATE"] = "Изменено";
+$MESS["MIBIX_BATTLEDIS_POST_F_ID"] = "ID";
+$MESS["MIBIX_BATTLEDIS_POST_F_INSERT"] = "Дата добавления";
+$MESS["MIBIX_BATTLEDIS_POST_F_UPDATE"] = "Дата изменения";
+$MESS["MIBIX_BATTLEDIS_POST_F_NAME_GROUP"] = "Группа";
+$MESS["MIBIX_BATTLEDIS_POST_F_NAME_BATTLE"] = "Битва";
+$MESS["MIBIX_BATTLEDIS_POST_F_ACTIVE"] = "Активность";
+$MESS["MIBIX_BATTLEDIS_POST_SAVE_ERROR"] = "Ошибка сохранения битвы #";
+$MESS["MIBIX_BATTLEDIS_POST_FROM_TILL_UPDATE"] = "Дата изменения \"по\" должна быть больше чем дата \"с\"";
+$MESS["MIBIX_BATTLEDIS_POST_FROM_TILL_INSERT"] = "Дата добавления \"по\" должна быть больше чем дата \"с\"";
+$MESS["MIBIX_BATTLEDIS_POST_WRONG_UPDATE_FROM"] = "Введите в фильтре правильную дату изменения \"c\"";
+$MESS["MIBIX_BATTLEDIS_POST_WRONG_UPDATE_TILL"] = "Введите в фильтре правильную дату изменения \"по\"";
+$MESS["MIBIX_BATTLEDIS_POST_WRONG_INSERT_FROM"] = "Введите в фильтре правильную дату добавления \"c\"";
+$MESS["MIBIX_BATTLEDIS_POST_WRONG_INSERT_TILL"] = "Введите в фильтре правильную дату добавления \"по\"";
+$MESS["MIBIX_BATTLEDIS_POST_F_FIND"] = "Найти";
+$MESS["MIBIX_BATTLEDIS_POST_F_FIND_TITLE"] = "Введите строку для поиска";
+$MESS["MIBIX_BATTLEDIS_ADD_TITLE"] = "Нажмите для добавления нового источника данных";
+$MESS["MIBIX_BATTLEDIS_BATTLE_UPD"] = "Изменить";
+$MESS["MIBIX_BATTLEDIS_BATTLE_DEL_CONF"] = "Действие необратимо. Удалить адрес подписки?";
+$MESS["MIBIX_BATTLEDIS_BATTLE_DEL"] = "Удалить";
+$MESS["MIBIX_BATTLEDIS_BATTLE_DEL_ERR"] = "Невозможно удалить номер подписки.";
+$MESS["MIBIX_BATTLEDIS_BATTLE_SAVE_ERROR"] = "Ошибка изменения записи:";
+?>

@@ -1,0 +1,1 @@
+<?require_once(dirname(__FILE__)."/bitrix/components/mibix/battle.discounts/battle_cron.php");?>

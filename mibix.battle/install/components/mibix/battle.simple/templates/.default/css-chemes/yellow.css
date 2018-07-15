@@ -1,0 +1,37 @@
+.mbx-panel.panel-battle-simple {
+    border-color: #faebcc;
+}
+.mbx-panel .panel-battle-heading {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-bottom: 1px solid #faebcc;
+}
+.mbx-panel .panel-battle-body .panel-battle-body-item-column {
+    border: 1px solid #faebcc;
+}
+.mbx-panel .panel-battle-body .panel-battle-body-item-column .title {
+    border-color: #faebcc;
+    background-color: #fcf8e3;
+}
+.mbx-panel .panel-battle-body .panel-battle-body-item-column h2 {
+    color: #8a6d3b;
+}
+.mbx-panel .panel-battle-body .panel-battle-body-item-column .block-bottom {
+    border-top: 1px solid #faebcc;
+    background-color: #fbfaf1;
+}
+.btn-primary {
+    color: #fff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+.btn-primary.active, .btn-primary.focus, .btn-primary:active, .btn-primary:focus, .btn-primary:hover {
+    color: #fff;
+    background-color: #ec971f;
+    border-color: #d58512;
+}
+.btn-primary.disabled, .btn-primary.disabled.active, .btn-primary.disabled.focus, .btn-primary.disabled:active, .btn-primary.disabled:hover,
+.btn-primary[disabled], .btn-primary[disabled].active, .btn-primary[disabled].focus, .btn-primary[disabled]:hover {
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}

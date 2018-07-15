@@ -1,0 +1,1 @@
+<?require_once(dirname(__FILE__)."/bitrix/modules/mibix.socposter/tools/post.php");?>

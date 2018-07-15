@@ -1,0 +1,243 @@
+/* Делаем буфер снизу, для размещения панели */
+.mbx-basket_buffer-space { height:41px; }
+
+/* Скрываем по умолчанию список товаров */
+#mbasket_cart { display: none; }
+
+/* Обище стили панели */
+.mbx-basket_bottom-panel {
+    font: .8125em/1.385 arial,sans-serif;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+}
+.mbx-basket_bottom-panel ol,
+.mbx-basket_bottom-panel ul {
+    list-style: none;
+}
+.mbx-basket_bottom-panel .mbx-basket_bottom-panel-i {
+    height: 41px;
+    behavior: url('/bitrix/js/mibix.basket.available/PIE.htc');
+    line-height: 40px;
+    position: relative;
+}
+.mbx-basket_bottom-panel .mbx-basket_bottom-panel-i .mbx-basket_inner {
+    min-width: 978px;
+    max-width: 1040px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+/* Общие стили для левой части панели */
+.mbx-basket_bottom-panel .mbx-basket_bottom-panel-feedback {
+    float: left;
+    margin-right: -100%;
+    height: 41px;
+    line-height: 40px;
+}
+
+/* Общие стили для правой части панели */
+.mbx-basket_bottom-panel .mbx-basket_cart-short {
+    float: right;
+    margin: 0 -22px 0 0;
+    padding: 0 1px;
+    position: relative;
+}
+.mbx-basket_bottom-panel .mbx-basket_cart-short li {
+    float: left;
+    font-size: 14px;
+    padding: 0 20px;
+    height: 41px;
+    behavior: url('/bitrix/js/mibix.basket.available/PIE.htc');
+    position: relative;
+}
+
+/* Ссылки Корзина и Сравнить правой части панели */
+.mbx-basket_bottom-panel .mbx-basket_cart-short .g-underline,
+.mbx-basket_bottom-panel .mbx-basket_cart-short div .g-underline {
+    border-bottom: 1px solid;
+    text-decoration: none;
+}
+
+/* Количество на общей панели */
+.mbx-basket_bottom-panel .mbx-basket_cart-short li .empty,
+.mbx-basket_bottom-panel .mbx-basket_cart-short li .num {
+    margin: 0 0 0 .5em;
+}
+.mbx-basket_bottom-panel .mbx-basket_cart-short li .empty {
+    display: -moz-inline-box;
+    display: inline-block;
+    zoom: 1;
+    min-width: 5.7em;
+    font-size: .92em;
+    font-weight: normal;
+}
+.mbx-basket_bottom-panel .mbx-basket_cart-short li .num {
+    font-weight: bold;
+}
+
+/* Количество товара в общей панели */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a {
+    text-decoration: none;
+}
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .count {
+    display: -moz-inline-box;
+    display: inline-block;
+    zoom: 1;
+    min-width: 1.2em;
+    font-size: 12px;
+    height: 1.583em;
+    line-height: 1.583em;
+    white-space: nowrap;
+    text-align: center;
+    padding: 0 .5em;
+    font-weight: bold;
+    margin: 0 0 0 .5em;
+    -webkit-border-radius: .7em;
+    -moz-border-radius: .7em;
+    border-radius: .7em;
+    behavior: url('/bitrix/js/mibix.basket.available/PIE.htc');
+}
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a .g-underline.fade,
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv a.active .g-underline.fade {
+    font-weight: normal;
+}
+
+/* Кнопка Оформить заказ */
+.mbx-basket_bottom-panel .bt1 {
+    white-space:nowrap;
+    border-radius:3px;
+    border:none;
+    width:60px;
+    cursor:pointer;
+    font-size:13px;
+    padding:6px 13px 8px !important;
+    margin-left: 10px;
+    text-decoration:none;
+    text-align:center;
+    font-weight:bold;
+}
+.mbx-basket_bottom-panel .bt1 span {
+    display:inline-block;
+    margin-right:5px;
+    margin-bottom:-5px;
+    width:20px;
+    height:18px
+}
+.mbx-basket_bottom-panel .bt1:active{
+    border:none;
+    box-shadow: inset 0 1px 1px rgba(28,50,7,.37) !important;
+    padding:5px 12px 7px;
+}
+.mbx-basket_bottom-panel .bt1._disabled,
+.mbx-basket_bottom-panel .bt1._disabled:hover,
+.mbx-basket_bottom-panel .bt1._disabled:active {
+    text-shadow: none;
+    box-shadow: none;
+    cursor: default;
+}
+
+/* Кнопка Авторизации/Кабинета */
+.mbx-basket_bottom-panel .bt2 {
+    font-size:13px;
+    text-align:center;
+    padding:7px 16px;
+    text-decoration:none;
+    border-radius:3px;
+    font-weight:bold;
+}
+.mbx-basket_bottom-panel .bt2:hover {
+    text-decoration:none !important
+}
+.mbx-basket_bottom-panel .bt2:active{
+    box-shadow:none;
+    padding:6px 15px;
+}
+
+/* Всплывающая панель с товарами корзины */
+.mbx-basket_cart-short .cart_view {
+    position:absolute;
+    display:block;
+    left:0px;
+    bottom:100%;
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: normal;
+    border-radius:3px;
+    -webkit-animation:borderview 0.5s;
+    animation:borderview 0.5s;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions th,
+.mbx-basket_cart-short .cart_view table.basket_positions td {
+    font-size: 12px;
+    font-weight:normal;
+    padding: 1px 3px;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions th {
+    color: #333;
+    text-align:left;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions input {
+    width:30px;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .quantity_count a {
+    display: block;
+    height: 10px;
+    text-align: center;
+    width: 11px;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .quantity_count a.plus {
+    background-position: 0px 0px;
+    border-radius: 5px 5px 0 0;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .quantity_count a.minus {
+    background-position: 0px -20px;
+    border-radius: 0 0 5px 5px;
+    margin-top: -1px;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .price {
+     color:#333;
+     font-weight:bold;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .delete {
+    text-align: center;
+}
+.mbx-basket_cart-short .cart_view table.basket_positions .quan { padding: 1px 0px 1px 3px; }
+.mbx-basket_cart-short .cart_view table.basket_positions .quan_count { padding: 1px 3px 1px 0px; }
+.mbx-basket_cart-short .cart_view .photo_container .order_photo {
+    width:auto;
+    height:24px;
+    background-position: center;
+    -webkit-background-size: auto 100%;
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+}
+
+/* Кнопки Авторизации/Регистрации/Кабинет */
+.mbx-basket_bottom-panel .signin {
+    font-weight:bold;
+    font-size:13px
+}
+.mbx-basket_bottom-panel .logout,
+.mbx-basket_bottom-panel .signup {
+    text-decoration:underline;
+    font-weight:normal !important;
+    font-size:12px
+}
+.mbx-basket_bottom-panel .signin:hover,
+.mbx-basket_bottom-panel .logout:hover{text-decoration:none}
+
+
+/* Стилизация скроллинга */
+.mbx-basket_bottom-panel .mbx-basket_cart.mbx-basket_serv .scroll_arrow {
+    width:40px;
+    height:40px;
+}
+#scrollNavArrow {
+    opacity: 0.7;
+    cursor: pointer;
+    display: none;
+}
