@@ -14,6 +14,20 @@ BX.ready(function()
             html: BX('first_param').innerHTML
         }));
     });
+    // добавление новых полей <delivery-options>
+    BX.bind(BX('do_add'), 'click', function()
+    {
+        BX('div_do').appendChild(BX.create('div', {
+            html: BX('first_do').innerHTML
+        }));
+    });
+    // добавление новых полей <outlets>
+    BX.bind(BX('outlets_add'), 'click', function()
+    {
+        BX('div_outlets').appendChild(BX.create('div', {
+            html: BX('first_outlets').innerHTML
+        }));
+    });
     // обработчик выбора сайта
     BX.bind(BX('f_site_id'), 'change', function()
     {
@@ -63,6 +77,7 @@ BX.ready(function()
                 BX.closeWait();
                 BX('f_include_sections').innerHTML = result["IBLOCK_SECTIONS"];
                 BX('f_exclude_sections').innerHTML = result["IBLOCK_SECTIONS"];
+                BX('f_filter').innerHTML = result["FILTER_NAME"];
             }
         });
     });
@@ -137,6 +152,7 @@ BX.ready(function()
                 BX('f_weight').innerHTML = result["PARAM_SELECT_WEIGHT"];
                 BX('f_dimensions').innerHTML = result["PARAM_SELECT_DIMENSIONS"];
                 BX('f_param').innerHTML = result["PARAM_SELECT_PARAM"]; ////////////////////////////
+                //BX('f_do').innerHTML = result["PARAM_SELECT_DO"]; ////////////////////////////
                 BX('f_cpa').innerHTML = result["PARAM_SELECT_CPA"];
                 BX('f_author').innerHTML = result["PARAM_SELECT_AUTHOR"];
                 BX('f_publisher').innerHTML = result["PARAM_SELECT_PUBLISHER"];
@@ -294,6 +310,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','table-row'); // display
             BX.style(BX('t_dimensions'), 'display','table-row'); // display
             BX.style(BX('t_param'), 'display','table-row'); // display
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','table-row'); // display
             BX.style(BX('t_author'), 'display','none'); // hide
             BX.style(BX('t_publisher'), 'display','none'); // hide
@@ -357,6 +375,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','none'); // hide
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','none'); // hide
             BX.style(BX('t_author'), 'display','table-row'); // display
             BX.style(BX('t_publisher'), 'display','table-row'); // display
@@ -420,6 +440,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','none'); // hide
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','none'); // hide
             BX.style(BX('t_author'), 'display','table-row'); // display
             BX.style(BX('t_publisher'), 'display','table-row'); // display
@@ -483,6 +505,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','none'); // hide
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','none'); // hide
             BX.style(BX('t_author'), 'display','none'); // hide
             BX.style(BX('t_publisher'), 'display','none'); // hide
@@ -546,6 +570,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','none'); // hide
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','none'); // hide
             BX.style(BX('t_author'), 'display','none'); // hide
             BX.style(BX('t_publisher'), 'display','none'); // hide
@@ -609,6 +635,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','none'); // hide
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','none'); // hide
             BX.style(BX('t_author'), 'display','none'); // hide
             BX.style(BX('t_publisher'), 'display','none'); // hide
@@ -672,6 +700,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','none'); // hide
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','none'); // hide
             BX.style(BX('t_author'), 'display','none'); // hide
             BX.style(BX('t_publisher'), 'display','none'); // hide
@@ -735,6 +765,8 @@ function displayFieldsByType(fType)
             BX.style(BX('t_weight'), 'display','none'); // hide
             BX.style(BX('t_dimensions'), 'display','none'); // hide
             BX.style(BX('t_param'), 'display','table-row'); // display
+            BX.style(BX('t_do'), 'display','table-row'); // display
+            BX.style(BX('t_outlets'), 'display','table-row'); // display
             BX.style(BX('t_cpa'), 'display','table-row'); // display
             BX.style(BX('t_author'), 'display','none'); // hide
             BX.style(BX('t_publisher'), 'display','none'); // hide

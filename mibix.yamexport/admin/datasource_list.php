@@ -76,6 +76,8 @@ $FilterArr = Array(
     "find",
     "find_type",
     "find_id",
+    "find_name",
+    "find_shop_id",
     "find_iblock_id",
     "find_data_name",
     "find_active",
@@ -93,6 +95,8 @@ if(CheckFilter())
 {
     $arFilter = Array(
         "ID"		=> ($find!="" && $find_type == "id"? $find : $find_id),
+        "NAME"      => $find_name,
+        "SHOP_ID"	=> $find_shop_id,
         "IBLOCK_ID"	=> $find_iblock_id,
         "DATA_NAME"	=> ($find!="" && $find_type == "data_name"? $find : $find_data_name),
         "UPDATE_1"	=> $find_update_1,
@@ -211,6 +215,12 @@ $lAdmin->AddHeaders(array(
         "default"	=> true,
     ),
     array(
+        "id"		=> "name",
+        "content"	=> GetMessage("MIBIX_YAM_SHOP_ID"),
+        "sort"		=> "name",
+        "default"	=> true,
+    ),
+    array(
         "id"		=> "active",
         "content"	=> GetMessage("MIBIX_YAM_ACT"),
         "sort"		=> "act",
@@ -236,12 +246,13 @@ while($arRes = $rsData->NavNext(true, "f_"))
     {
         $resIblock = CIBlock::GetByID($f_iblock_id);
         if($arResIblock = $resIblock->GetNext())
-            $strIblock = "(ID:".$f_iblock_id.") " . $arResIblock['NAME'];
+            $strIblock = "[ID:".$f_iblock_id."] " . $arResIblock['NAME'];
     }
 
     // редактируется как текст
     $row->AddInputField("name_data", array("size"=>20));
     $row->AddViewField("name_data", '<a href="mibix.yamexport_datasource_edit.php?ID='.$f_id.'&lang='.LANG.'">'.$f_name_data.'</a>');
+    $row->AddViewField("name", '[ID:'.$f_shop_id.'] '.$f_name);
     $row->AddViewField("iblock_id", $strIblock);
     // редактируется как чекбокс
     $row->AddCheckField("active");
@@ -311,6 +322,8 @@ $oFilter = new CAdminFilter(
         GetMessage("MIBIX_YAM_POST_F_INSERT"),
         GetMessage("MIBIX_YAM_POST_F_UPDATE"),
         GetMessage("MIBIX_YAM_POST_F_NAME_DATA"),
+        GetMessage("MIBIX_YAM_POST_F_SHOP_ID"),
+        GetMessage("MIBIX_YAM_POST_F_SHOP"),
         GetMessage("MIBIX_YAM_POST_F_IBLOCK"),
         GetMessage("MIBIX_YAM_POST_F_ACTIVE"),
     )
@@ -329,11 +342,15 @@ $oFilter = new CAdminFilter(
                     "reference" => array(
                         GetMessage("MIBIX_YAM_POST_F_NAME_DATA"),
                         GetMessage("MIBIX_YAM_POST_F_ID"),
+                        GetMessage("MIBIX_YAM_POST_F_SHOP_ID"),
+                        GetMessage("MIBIX_YAM_POST_F_SHOP"),
                         GetMessage("MIBIX_YAM_POST_F_IBLOCK"),
                     ),
                     "reference_id" => array(
                         "data_name",
                         "id",
+                        "shop_id",
+                        "name",
                         "iblock_id",
                     )
                 );
@@ -356,6 +373,14 @@ $oFilter = new CAdminFilter(
         <tr>
             <td><?=GetMessage("MIBIX_YAM_POST_F_NAME_DATA")?>:</td>
             <td><input type="text" name="find_data_name" size="47" value="<?=htmlspecialchars($find_data_name)?>">&nbsp;<?=ShowFilterLogicHelp()?></td>
+        </tr>
+        <tr>
+            <td><?=GetMessage("MIBIX_YAM_POST_F_SHOP_ID")?>:</td>
+            <td><input type="text" name="find_shop_id" size="47" value="<?=htmlspecialchars($find_shop_id)?>">&nbsp;<?=ShowFilterLogicHelp()?></td>
+        </tr>
+        <tr>
+            <td><?=GetMessage("MIBIX_YAM_POST_F_SHOP")?>:</td>
+            <td><input type="text" name="find_name" size="47" value="<?=htmlspecialchars($find_name)?>">&nbsp;<?=ShowFilterLogicHelp()?></td>
         </tr>
         <tr>
             <td><?=GetMessage("MIBIX_YAM_POST_F_IBLOCK")?>:</td>

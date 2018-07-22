@@ -6,6 +6,10 @@ define("NOT_CHECK_PERMISSIONS", true);
 define('NO_AGENT_CHECK', true);
 define("STATISTIC_SKIP_ACTIVITY_CHECK", true);
 
+$SHOP_ID = 1;
+if (isset($_REQUEST['ID']) && IntVal($_REQUEST['ID']) > 0)
+    $SHOP_ID = IntVal($_REQUEST['ID']);
+
 $MODULE_ID = "mibix.yamexport";
 $DOCUMENT_ROOT = $_SERVER['DOCUMENT_ROOT'] = realpath(dirname(__FILE__).'/../../../../');
 require($_SERVER['DOCUMENT_ROOT'].'/bitrix/modules/main/include/prolog_before.php');
@@ -31,7 +35,8 @@ CJSCore::Init(array('ajax'));
             var postData = {
                 'sessid': BX.bitrix_sessid(),
                 'site_id': BX.message('SITE_ID'),
-                'action': 'get_step_yml'
+                'action': 'get_step_yml',
+                'shop_id': <?=$SHOP_ID?>
             };
 
             BX.ajax({
@@ -43,7 +48,6 @@ CJSCore::Init(array('ajax'));
                     BX.closeWait();
 
                     // выводим информацию о выгрузке на экран
-
                     divNode.appendChild(BX.create('p', {
                         html: '[#' + cur_step + '] => ' + result['STEP_TIME']
                     }));

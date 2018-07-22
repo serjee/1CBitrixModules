@@ -14,7 +14,8 @@ $aMenu = array(
     "items" => array(
         array(
             "text" => GetMessage("yam_mnu_main"),
-            "url" => "mibix.yamexport_general_settings.php?lang=".LANGUAGE_ID,
+            "url" => "mibix.yamexport_general_list.php?lang=".LANGUAGE_ID,
+            "more_url" => array("mibix.yamexport_general_settings.php"),
             "title" => GetMessage("yam_mnu_main_alt")
         ),
         array(

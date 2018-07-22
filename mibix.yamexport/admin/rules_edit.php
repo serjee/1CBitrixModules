@@ -66,6 +66,44 @@ if($REQUEST_METHOD == "POST" && ($save != "" || $apply != "") && $POST_RIGHT >= 
         if(count($arStrParams)>0) $strParams = implode("|", $arStrParams);
     }
 
+    // обработка переменных <delivery-options>
+    $strDeliveryoptions = "";
+    if(isset($f_do_cost[0]) && isset($f_do_days[0]) && strlen($f_do_cost[0])>0 && strlen($f_do_days[0])>0)
+    {
+        // количество параметров в массиве
+        $cntPv = count($f_do_cost);
+
+        // Проходимся по всем параметрам в массиве и преобразуем их к виду "name,unit,value|name,unit,value|name,unit,value.." для записи в базу
+        $arStrDeliveryoptions = array();
+        for($i=0;$i<$cntPv;$i++)
+        {
+            $strDoCost = (isset($f_do_cost[$i]))?$f_do_cost[$i]:"";
+            $strDoDays = (isset($f_do_days[$i]))?$f_do_days[$i]:"";
+            $strDoBefore = (isset($f_do_before[$i]))?$f_do_before[$i]:"24";
+            $arStrDeliveryoptions[] = $strDoCost.",".$strDoDays.",".$strDoBefore;
+        }
+        if(count($arStrDeliveryoptions)>0) $strDeliveryoptions = implode("|", $arStrDeliveryoptions);
+    }
+
+    // обработка переменных <outlets>
+    $strOutlets = "";
+    if(isset($f_outlets_id[0]) && strlen($f_outlets_id[0])>0)
+    {
+        // количество параметров в массиве
+        $cntPv = count($f_outlets_id);
+
+        // Проходимся по всем параметрам в массиве и преобразуем их к виду "name,unit,value|name,unit,value|name,unit,value.." для записи в базу
+        $arStrOutlets = array();
+        for($i=0;$i<$cntPv;$i++)
+        {
+            $strOlId = (isset($f_outlets_id[$i]))?$f_outlets_id[$i]:"";
+            $strOlInstock = (isset($f_outlets_instock[$i]))?$f_outlets_instock[$i]:"0";
+            $strOlBookinig = (isset($f_outlets_booking[$i]))?$f_outlets_booking[$i]:"true";
+            $arStrOutlets[] = $strOlId.",".$strOlInstock.",".$strOlBookinig;
+        }
+        if(count($arStrOutlets)>0) $strOutlets = implode("|", $arStrOutlets);
+    }
+
     // Обработка данных форм с собственными значениями
     $arParamsSelf = array("bid","cbid","typeprefix","model","local_delivery_cost","sales_notes","manufacturer_warranty","seller_warranty","country_of_origin","age","barcode","expiry","hall_plan");
     foreach($arParamsSelf as $paramSelf)
@@ -126,6 +164,8 @@ if($REQUEST_METHOD == "POST" && ($save != "" || $apply != "") && $POST_RIGHT >= 
         "weight"            => $f_weight,
         "dimensions"        => $f_dimensions,
         "param"             => $strParams,
+        "deliveryoptions"   => $strDeliveryoptions,
+        "outlets"           => $strOutlets,
         "cpa"               => $f_cpa,
         "author"            => $f_author,
         "publisher"         => $f_publisher,
@@ -226,7 +266,7 @@ if($str_datasource_id>0 && empty($str_iblock_id))
 // Для поля "картинки" преобразуем строку в массив (т.к. там могут быть множественные выделенные значения)
 $str_picture = explode(",", $str_picture);
 
-// определяем значения для параметров
+// определяем значения для <params>
 if(strlen($str_param)>0)
 {
     // из строки формируем массив параметров
@@ -245,6 +285,54 @@ if(strlen($str_param)>0)
                 $str_param_name[] = $arParamElements[0];
                 $str_param_unit[] = $arParamElements[1];
                 $str_param_value[] = $arParamElements[2];
+            }
+        }
+    }
+}
+
+// определяем значения для <delivery-options>
+if(strlen($str_deliveryoptions)>0)
+{
+    // из строки формируем массив параметров
+    $arDeliveryoptions = explode("|", $str_deliveryoptions);
+    if(count($arDeliveryoptions)>0)
+    {
+        $str_do_cost = array();
+        $str_do_days = array();
+        $str_do_before = array();
+        foreach($arDeliveryoptions as $str_deliveryoptions)
+        {
+            // формируем отдельный массива для элементов каждого параметра
+            $arDeliveryoptionsElements = explode(",", $str_deliveryoptions);
+            if(count($arDeliveryoptionsElements)==3 && isset($arDeliveryoptionsElements[0]) && isset($arDeliveryoptionsElements[1]) && isset($arDeliveryoptionsElements[2]))
+            {
+                $str_do_cost[] = $arDeliveryoptionsElements[0];
+                $str_do_days[] = $arDeliveryoptionsElements[1];
+                $str_do_before[] = $arDeliveryoptionsElements[2];
+            }
+        }
+    }
+}
+
+// определяем значения для <outlets>
+if(strlen($str_outlets)>0)
+{
+    // из строки формируем массив параметров
+    $arOutlets = explode("|", $str_outlets);
+    if(count($arOutlets)>0)
+    {
+        $str_outlets_id = array();
+        $str_outlets_instock = array();
+        $str_outlets_booking = array();
+        foreach($arOutlets as $str_outlets)
+        {
+            // формируем отдельный массива для элементов каждого параметра
+            $arOutletsElements = explode(",", $str_outlets);
+            if(count($arOutletsElements)==3 && isset($arOutletsElements[0]) && isset($arOutletsElements[1]) && isset($arOutletsElements[2]))
+            {
+                $str_outlets_id[] = $arOutletsElements[0];
+                $str_outlets_instock[] = $arOutletsElements[1];
+                $str_outlets_booking[] = $arOutletsElements[2];
             }
         }
     }
@@ -422,26 +510,6 @@ if($message)
             </td>
         </tr>
         <tr>
-            <td width="40%" class="adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PRICE");?>:</td>
-            <td width="60%" class="adm-detail-content-cell-r">
-                <?echo CMibixModelRules::getSelectBoxPriceType($str_price, $str_iblock_id);?>
-            </td>
-        </tr>
-        <?if(CModule::IncludeModule("sale") && CModule::IncludeModule("catalog")):?>
-        <tr>
-            <td width="40%" class="adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PRICE_OPTIMAL");?>:</td>
-            <td width="60%" class="adm-detail-content-cell-r">
-                <input type="checkbox" name="f_price_optimal" value="Y"<?if($str_price_optimal=="Y" || empty($str_price_optimal)) echo " checked";?>>
-            </td>
-        </tr>
-        <?endif;?>
-        <tr>
-            <td width="40%" class="adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PRICE_CURRENCY")?>:</td>
-            <td width="60%">
-                <input type="text" size="10" maxlength="15" value="<?=$str_price_currency;?>" name="f_price_currency" />
-            </td>
-        </tr>
-        <tr>
             <td width="40%" class="adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PICTURE");?>:</td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?echo CMibixModelRules::getControlParamsMultiSelectBoxPicture("picture", $str_picture, $str_iblock_id);?>
@@ -493,6 +561,24 @@ if($message)
                 <?echo CMibixModelRules::getControlParamsSelectBox("delivery", $str_delivery, $str_iblock_id);?>
                 <div class="adm-info-message">
                     <?=GetMessage("MIBIX_YAM_RULES_DELIVERY_NOTE");?>
+                </div>
+            </td>
+        </tr>
+        <tr id="t_do" style="display:none;">
+            <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_DO");?>:</td>
+            <td width="60%" class="adm-detail-content-cell-r">
+                <?echo CMibixModelRules::getControlDeliveryOptions($str_do_cost, $str_do_days, $str_do_before);?>
+                <div class="adm-info-message">
+                    <?=GetMessage("MIBIX_YAM_RULES_DO_NOTE");?>
+                </div>
+            </td>
+        </tr>
+        <tr id="t_outlets" style="display:none;">
+            <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_OUTLETS");?>:</td>
+            <td width="60%" class="adm-detail-content-cell-r">
+                <?echo CMibixModelRules::getControlOutlets($str_outlets_id, $str_outlets_instock, $str_outlets_booking);?>
+                <div class="adm-info-message">
+                    <?=GetMessage("MIBIX_YAM_RULES_OUTLETS_NOTE");?>
                 </div>
             </td>
         </tr>
@@ -1027,9 +1113,6 @@ if($message)
                 </div>
             </td>
         </tr>
-        <tr class="heading">
-            <td colspan="2"><?=GetMessage("MIBIX_YAM_RULES_ADDIT_DRESS_TITLE")?></td>
-        </tr>
         <tr>
             <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_ADDIT_DRESS_GROUPID");?>:</td>
             <td width="60%" class="adm-detail-content-cell-r">
@@ -1039,6 +1122,35 @@ if($message)
                 </div>
             </td>
         </tr>
+        <tr class="heading">
+            <td colspan="2"><?=GetMessage("MIBIX_YAM_RULES_PRICE_SETTING")?></td>
+        </tr>
+        <tr>
+            <td width="40%" class="adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PRICE_CURRENCY")?>:</td>
+            <td width="60%">
+                <input type="text" size="10" maxlength="15" value="<?=$str_price_currency;?>" name="f_price_currency" />
+            </td>
+        </tr>
+        <tr>
+            <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PRICE");?>:</td>
+            <td width="60%" class="adm-detail-content-cell-r">
+                <?echo CMibixModelRules::getSelectBoxPriceType($str_price, $str_iblock_id);?>
+                <div class="adm-info-message">
+                    <?=GetMessage("MIBIX_YAM_RULES_PRICE_NOTE");?>
+                </div>
+            </td>
+        </tr>
+        <?if(CModule::IncludeModule("sale") && CModule::IncludeModule("catalog")):?>
+            <tr>
+                <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_PRICE_OPTIMAL");?>:</td>
+                <td width="60%" class="adm-detail-content-cell-r">
+                    <input type="checkbox" name="f_price_optimal" value="Y"<?if($str_price_optimal=="Y" || empty($str_price_optimal)) echo " checked";?>>
+                    <div class="adm-info-message">
+                        <?=GetMessage("MIBIX_YAM_RULES_PRICE_OPTIMAL_NOTE");?>
+                    </div>
+                </td>
+            </tr>
+        <?endif;?>
         <tr>
             <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_ADDIT_OLDPRICE");?>:</td>
             <td width="60%" class="adm-detail-content-cell-r">
@@ -1049,12 +1161,15 @@ if($message)
             </td>
         </tr>
         <?if(CModule::IncludeModule("sale") && CModule::IncludeModule("catalog")):?>
-        <tr>
-            <td width="40%" class="adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_OLDPRICE_OPTIMAL");?>:</td>
-            <td width="60%" class="adm-detail-content-cell-r">
-                <input type="checkbox" name="f_oldprice_optimal" value="Y"<?if($str_oldprice_optimal=="Y" || empty($str_oldprice_optimal)) echo " checked";?>>
-            </td>
-        </tr>
+            <tr>
+                <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_RULES_OLDPRICE_OPTIMAL");?>:</td>
+                <td width="60%" class="adm-detail-content-cell-r">
+                    <input type="checkbox" name="f_oldprice_optimal" value="Y"<?if($str_oldprice_optimal=="Y" || empty($str_oldprice_optimal)) echo " checked";?>>
+                    <div class="adm-info-message">
+                        <?=GetMessage("MIBIX_YAM_RULES_OLDPRICE_OPTIMAL_NOTE");?>
+                    </div>
+                </td>
+            </tr>
         <?endif;?>
         <?
         $tabControl->Buttons(

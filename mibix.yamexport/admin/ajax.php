@@ -48,6 +48,9 @@ if (!empty($_POST["action"]) && $_POST["action"]=="get_iblock_sections")
         $arRes["IBLOCK_SECTIONS"] .= '<option value="'.$arSection['ID'].'">'.str_repeat("..", ($arSection['DEPTH_LEVEL']-1)).trim($arSection['NAME']).'</option>';
         //$arRes["IBLOCK_SECTIONS"] .= $arSection['NAME'].' LEFT_MARGIN: '.$arSection['LEFT_MARGIN'].' RIGHT_MARGIN: '.$arSection['RIGHT_MARGIN'].'<br>';
     }
+
+    // Получаем свойства для фильтров
+    $arRes["FILTER_NAME"] = CMibixModelDataSource::getSelectBoxFilterName($IBLOCK_ID, '', false);
 }
 
 // Получение списка категорий Яндекс.Маркета по ID
@@ -188,6 +191,10 @@ if (!empty($_POST["action"]) && $_POST["action"]=="get_parameters_select")
     // param
     $arParams = CMibixModelRules::GetArrayParamsByCODE("param");
     $arRes["PARAM_SELECT_PARAM"] = CMibixModelRules::getSelectBoxProperty("", $IBLOCK_ID, $arParams);
+
+    // param
+    //$arParams = CMibixModelRules::GetArrayParamsByCODE("param");
+    //$arRes["PARAM_SELECT_PARAM"] = CMibixModelRules::getSelectBoxProperty("", $IBLOCK_ID, $arParams);
 
     // cpa
     $arParams = CMibixModelRules::GetArrayParamsByCODE("cpa");
@@ -345,8 +352,10 @@ if (!empty($_POST["action"]) && $_POST["action"]=="get_parameters_select")
 // Получение списка категорий Яндекс.Маркета по ID
 if (!empty($_POST["action"]) && $_POST["action"]=="get_step_yml")
 {
+    $shop_id = (!empty($_POST["shop_id"]) ? intval($_POST["shop_id"]) : 1);
+
     // Получаем значения и вызываем функцию генерации XML-файла
-    $YAM_EXPORT = CMibixYandexExport::get_step_settings(1);
+    $YAM_EXPORT = CMibixYandexExport::get_step_settings($shop_id);
     if(is_array($YAM_EXPORT) && count($YAM_EXPORT) > 0)
     {
         $YAM_EXPORT_LIMIT = $YAM_EXPORT["step_limit"]; // количество элементов, обрабатываемых за 1 шаг
@@ -356,7 +365,7 @@ if (!empty($_POST["action"]) && $_POST["action"]=="get_step_yml")
         $startTime = microtime(true);
 
         // Выгрузка завершена или нет
-        if(CMibixYandexExport::CreateYML($YAM_EXPORT_PATH, $YAM_EXPORT_LIMIT))
+        if(CMibixYandexExport::CreateYML($YAM_EXPORT_PATH, $YAM_EXPORT_LIMIT, false, $shop_id))
             $arRes["CREATE_YML_PROCCESS"] = "Y";
         else
             $arRes["CREATE_YML_PROCCESS"] = "N";
@@ -372,7 +381,7 @@ if (!empty($_POST["action"]) && $_POST["action"]=="get_step_yml")
     else
     {
         $arRes["CREATE_YML_PROCCESS"] = "N";
-        $arRes["STEP_TIME"] = "ERROR CONFIG LOAD";
+        $arRes["STEP_TIME"] = "Error config steps load. Please check fill of the limits for the shop.";
     }
 }
 

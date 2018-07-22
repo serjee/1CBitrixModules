@@ -55,11 +55,12 @@ if($REQUEST_METHOD == "POST" && ($save != "" || $apply != "") && $POST_RIGHT >= 
     // обработка данных формы
     $arFields = Array(
         "name_data"		    => $f_name_data,
+        "shop_id"           => $f_shop_id,
         "site_id"		    => $f_site_id,
         "iblock_type"		=> $f_iblock_type,
         "iblock_id"		    => intval($f_iblock_id),
-        "include_sections"  => $f_include_sections, // array
-        "exclude_sections"	=> $f_exclude_sections, // array
+        "include_sections"  => ($f_include_sections!=null?$f_include_sections:''), // array
+        "exclude_sections"	=> ($f_exclude_sections!=null?$f_exclude_sections:''), // array
         "include_items"	    => $f_include_items, // array
         "exclude_items"		=> $f_exclude_items, // array
         "include_sku"       => ($f_include_sku <> "Y"? "N":"Y"),
@@ -234,6 +235,19 @@ if($message)
             </td>
             <td width="60%">
                 <input type="text" size="50" maxlength="255" value="<?=$str_name_data;?>" name="f_name_data" />
+            </td>
+        </tr>
+        <tr>
+            <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><span class="required">*</span>
+                <span class="adm-required-field"><?=GetMessage("MIBIX_YAM_DATASOURCE_SHOP");?></span>:
+            </td>
+            <td width="60%" class="adm-detail-content-cell-r">
+                <?echo CMibixModelDataSource::getSelectBoxProfileShop($str_shop_id);?>
+                <div class="adm-info-message-wrap">
+                    <div class="adm-info-message">
+                        <?=GetMessage("MIBIX_YAM_DATASOURCE_SHOP_NOTE");?>
+                    </div>
+                </div>
             </td>
         </tr>
         <tr>

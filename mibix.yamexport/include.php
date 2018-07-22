@@ -27,12 +27,6 @@ class CMibixModelGeneral
         global $DB;
         $ID = intval($ID);
 
-        // Если переменная ID<1, то пытаемся получить 1-ю запись из базы (временно для настроек с одной записью)
-        if($ID < 1)
-        {
-            $ID = 1;
-        }
-
         $strSql =
             "SELECT g.*, ".
             "	".$DB->DateToCharFunction("g.date_update", "FULL")." AS date_update, ".
@@ -41,6 +35,137 @@ class CMibixModelGeneral
             "WHERE g.id='".$ID."' ";
 
         return $DB->Query($strSql, false, "File: ".__FILE__."<br>Line: ".__LINE__);
+    }
+
+    /**
+     * Список "Профилей магазинов" из базы
+     *
+     * @param array $aSort
+     * @param array $arFilter
+     * @param bool $arNavStartParams
+     * @return CDBResult|mixed
+     */
+    public function GetList($aSort=Array(), $arFilter=Array(), $arNavStartParams=false)
+    {
+        global $DB;
+        $arSqlSearch = Array();
+        $from1 = "";
+        if(is_array($arFilter))
+        {
+            foreach($arFilter as $key => $val)
+            {
+                if(!is_array($val))
+                {
+                    if( (strlen($val) <= 0) || ($val === "NOT_REF") )
+                        continue;
+                }
+                switch(strtoupper($key))
+                {
+                    case "ID":
+                        $arSqlSearch[] = GetFilterQuery("ps.id", $val, "N");
+                        break;
+                    case "PROFILE_ID":
+                        $arSqlSearch[] = GetFilterQuery("ps.profile_id", $val, "N");
+                        break;
+                    case "NAME":
+                        $arSqlSearch[] = GetFilterQuery("ps.name", $val, "Y", array("@", ".", "_"));
+                        break;
+                    case "UPDATE_1":
+                        $arSqlSearch[] = "ps.date_update>=".$DB->CharToDateFunction($val);
+                        break;
+                    case "UPDATE_2":
+                        $arSqlSearch[] = "ps.date_update<=".$DB->CharToDateFunction($val." 23:59:59");
+                        break;
+                    case "INSERT_1":
+                        $arSqlSearch[] = "ps.date_insert>=".$DB->CharToDateFunction($val);
+                        break;
+                    case "INSERT_2":
+                        $arSqlSearch[] = "ps.date_insert<=".$DB->CharToDateFunction($val." 23:59:59");
+                        break;
+                    case "ACTIVE":
+                        $arSqlSearch[] = ($val=="Y") ? "ps.active='Y'" : "ps.active='N'";
+                        break;
+                }
+            }
+        }
+        $strSqlSearch = GetFilterSqlSearch($arSqlSearch);
+
+        $arOrder = array();
+        foreach($aSort as $by => $ord)
+        {
+            $by = strtoupper($by);
+            $ord = (strtoupper($ord) <> "ASC"? "DESC": "ASC");
+            switch($by)
+            {
+                case "ID": $arOrder[$by] = "ps.id ".$ord; break;
+                case "PROFILE_ID": $arOrder[$by] = "ps.profile_id ".$ord; break;
+                case "NAME": $arOrder[$by] = "ps.name ".$ord; break;
+                case "DATE_INSERT": $arOrder[$by] = "ps.date_insert ".$ord; break;
+                case "DATE_UPDATE": $arOrder[$by] = "ps.date_update ".$ord; break;
+                case "ACT": $arOrder[$by] = "ps.active ".$ord; break;
+            }
+        }
+        if(count($arOrder) <= 0) $arOrder["ID"] = "ps.id DESC";
+
+        if(is_array($arNavStartParams))
+        {
+            $strSql = "
+				SELECT count(".($from1 <> ""? "DISTINCT ps.id": "'x'").") as C
+				FROM
+					b_mibix_yam_general ps
+					$from1
+				WHERE
+				".$strSqlSearch;
+
+            $res_cnt = $DB->Query($strSql, false, "File: ".__FILE__."<br>Line: ".__LINE__);
+            $res_cnt = $res_cnt->Fetch();
+            $cnt = $res_cnt["C"];
+
+            $strSql = "
+				SELECT
+					ps.id, ps.profile_id, ps.active, ps.name,
+					".$DB->DateToCharFunction("ps.date_update")." date_update,
+					".$DB->DateToCharFunction("ps.date_insert")." date_insert
+				FROM
+					b_mibix_yam_general ps
+					$from1
+				WHERE
+				$strSqlSearch
+				".($from1 <> ""?
+                    "GROUP BY ps.id, ps.profile_id, ps.active, ps.name":
+                    ""
+                )."
+				ORDER BY ".implode(", ", $arOrder);
+
+            $res = new CDBResult();
+            $res->NavQuery($strSql, $cnt, $arNavStartParams);
+            $res->is_filtered = (IsFiltered($strSqlSearch));
+
+            return $res;
+        }
+        else
+        {
+            $strSql = "
+				SELECT
+					ps.id, ps.profile_id, ps.active, ps.name,
+					".$DB->DateToCharFunction("ps.date_update")." date_update,
+					".$DB->DateToCharFunction("ps.date_insert")." date_insert
+				FROM
+					b_mibix_yam_general ps
+					$from1
+				WHERE
+				$strSqlSearch
+				".($from1 <> ""?
+                    "GROUP BY ps.id, ps.profile_id, ps.active, ps.name":
+                    ""
+                )."
+				ORDER BY ".implode(", ", $arOrder);
+
+            $res = $DB->Query($strSql, false, "File: ".__FILE__."<br>Line: ".__LINE__);
+            $res->is_filtered = (IsFiltered($strSqlSearch));
+
+            return $res;
+        }
     }
 
     /**
@@ -165,16 +290,37 @@ class CMibixModelGeneral
         }
         if(is_set($arFields, "step_limit"))
         {
-            if(!is_numeric($arFields["step_limit"]))
+            if(!empty($arFields["step_limit"]) && !is_numeric($arFields["step_limit"]))
             {
                 $this->arMsg[] = array("id"=>"step_limit", "text"=>GetMessage("MIBIX_YAM_ERR_STEP_LIMIT"));
             }
         }
         if(is_set($arFields, "step_interval_run"))
         {
-            if(!is_numeric($arFields["step_interval_run"]))
+            if(!empty($arFields["step_limit"]) && !is_numeric($arFields["step_interval_run"]))
             {
                 $this->arMsg[] = array("id"=>"step_interval_run", "text"=>GetMessage("MIBIX_YAM_ERR_STEP_INTERVAL_RUN"));
+            }
+        }
+        if(is_set($arFields, "do_cost"))
+        {
+            if(!empty($arFields["do_cost"]) && !is_numeric($arFields["do_cost"]))
+            {
+                $this->arMsg[] = array("id"=>"step_interval_run", "text"=>GetMessage("MIBIX_YAM_ERR_DO_COST"));
+            }
+        }
+        if(is_set($arFields, "do_days"))
+        {
+            if(empty($arFields["do_cost"]) && !empty($arFields["do_days"]))
+            {
+                $this->arMsg[] = array("id"=>"step_interval_run", "text"=>GetMessage("MIBIX_YAM_ERR_DO_DAYS"));
+            }
+        }
+        if(is_set($arFields, "do_before"))
+        {
+            if(!empty($arFields["do_before"]) && $arFields["do_before"]<0 && $arFields["do_before"]>24)
+            {
+                $this->arMsg[] = array("id"=>"step_interval_run", "text"=>GetMessage("MIBIX_YAM_ERR_DO_BEFORE"));
             }
         }
 
@@ -186,6 +332,28 @@ class CMibixModelGeneral
 
         return true;
     }
+
+    /**
+     * Удаляем профиль магазина из базы по его ID
+     *
+     * @param $ID
+     * @return mixed
+     */
+    public function Delete($ID)
+    {
+        global $DB;
+        $ID = intval($ID);
+
+        $DB->StartTransaction();
+        $res = $DB->Query("DELETE FROM b_mibix_yam_general WHERE id='".$ID."'", false, "File: ".__FILE__."<br>Line: ".__LINE__);
+
+        if($res)
+            $DB->Commit();
+        else
+            $DB->Rollback();
+
+        return $res;
+    }
 }
 
 /**
@@ -195,6 +363,30 @@ class CMibixModelDataSource
 {
     public $LAST_ERROR="";
     public $LAST_MESSAGE="";
+
+    /**
+     * SelectBox со списком профилей магазинов
+     *
+     * @param $str_shop_id
+     * @return string
+     */
+    public function getSelectBoxProfileShop($str_shop_id)
+    {
+        global $DB;
+        $strHTML = '<select name="f_shop_id" id="f_shop_id" size="1">';
+
+        $dbRes = $DB->Query("SELECT id, name FROM b_mibix_yam_general WHERE active='Y'");
+        while($arRes = $dbRes->Fetch())
+        {
+            $selectField = "";
+            if ($arRes["id"]==$str_shop_id) $selectField = " selected";
+
+            $strHTML .= '<option value="'.$arRes["id"].'"'.$selectField.'>['.$arRes["id"].'] '.htmlspecialcharsEx($arRes["name"]).'</option>';
+        }
+        $strHTML .= '</select>';
+
+        return $strHTML;
+    }
 
     /**
      * SelectBox с типами сайтов
@@ -352,7 +544,7 @@ class CMibixModelDataSource
                     $strHTML .= '<div>';
 
                 // остальные поля контрола
-                $strHTML .= self::getSelectBoxFilterName($pName);
+                $strHTML .= self::getSelectBoxFilterName($iblock_id, $pName);
                 $strHTML .= self::getSelectBoxFilterUnit($pUnit);
                 $strHTML .= '<input type="text" name="f_filter_value[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_FILTER_VALUE").'" value="'.$pValue.'" />';
                 //$strHTML .= '<select name="f_filter_value[]" id="f_filter" size="1">'.self::getSelectBoxProperty($pValue, $iblock_id, array(""=>GetMessage("MIBIX_YAM_IRU_SEL_PARAMVALUE")), "S", false).'</select>';
@@ -362,7 +554,7 @@ class CMibixModelDataSource
         else
         {
             $strHTML .= '<div id="first_filter">';
-            $strHTML .= self::getSelectBoxFilterName();
+            $strHTML .= self::getSelectBoxFilterName($iblock_id);
             $strHTML .= self::getSelectBoxFilterUnit();
             $strHTML .= '<input type="text" name="f_filter_value[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_FILTER_VALUE").'" value="" />';
             $strHTML .= '</div>';
@@ -380,22 +572,79 @@ class CMibixModelDataSource
      * @param $pName
      * @return string
      */
-    private function getSelectBoxFilterName($pName="")
+    public function getSelectBoxFilterName($IBLOCK_ID, $pName="", $incSelect=true)
     {
-        $arFilterName = array(
-            "" => GetMessage("MIBIX_YAM_IRU_SEL_FILTER_NAME"),
+        $strHTML_main = '';
+        $strHTML_prop = '';
+        $strHTML_prop_sku = '';
+
+        // --- Общие фильтры ---
+        $arFilterNameMain = array(
+            //"" => GetMessage("MIBIX_YAM_IRU_SEL_FILTER_NAME"),
             "filter_price" => GetMessage("MIBIX_YAM_IRU_SEL_FILTER_PRICE"),
             "filter_quantity" => GetMessage("MIBIX_YAM_IRU_SEL_FILTER_QUANTITY"),
         );
-
-        $strHTML = '<select name="f_filter_name[]" id="f_filter" size="1">';
-        foreach($arFilterName as $fNameKey => $fNameValue)
+        // вытаскиваем склады
+        if (CModule::IncludeModule("sale") && CModule::IncludeModule("catalog"))
+        {
+            $rsStore = CCatalogStore::GetList(array(), array("ACTIVE" => "Y"), false, false, array());
+            while ($sklad = $rsStore->Fetch())
+            {
+                //var_dump($sklad);
+                $arFilterNameMain["sklad@".$sklad["ID"]] = "[".GetMessage("MIBIX_YAM_IRU_SEL_FILTER_SKLAD")." ID:".$sklad["ID"]."] ".$sklad["TITLE"];
+            }
+        }
+        foreach($arFilterNameMain as $fNameKey => $fNameValue)
         {
             $selectField = "";
             if ($pName==$fNameKey) $selectField = " selected";
-            $strHTML .= '<option value="'.$fNameKey.'"'.$selectField.'>'.$fNameValue.'</option>';
+            $strHTML_main .= '<option value="'.$fNameKey.'"'.$selectField.'>'.$fNameValue.'</option>';
         }
-        $strHTML .= '</select>&nbsp;';
+        // ---/ Общие фильтры ---
+
+        if ($IBLOCK_ID > 0)
+        {
+            // --- Фильтр по свойствам ---
+            $iblockProps = CIBlockProperty::GetList(Array("sort" => "asc", "name" => "asc"), Array("ACTIVE" => "Y", "IBLOCK_ID" => $IBLOCK_ID));
+            while ($arRes = $iblockProps->GetNext()) {
+                $selectField = "";
+                if ('prop@' . $arRes["CODE"] == $pName) $selectField = " selected";
+
+                $strHTML_prop .= '<option value="prop@' . $arRes["CODE"] . '"' . $selectField . '>[' . $arRes["CODE"] . '] ' . $arRes["NAME"] . '</option>';
+            }
+            // ---/ Фильтр по свойсмтвам ---
+
+            // --- Фильтр по свойствам SKU (если торговый каталог)
+            $arOffersSKU = NULL;
+            if (CModule::IncludeModule("sale") && CModule::IncludeModule("catalog")) {
+                $arOffersSKU = CCatalogSKU::GetInfoByProductIBlock($IBLOCK_ID);
+            }
+            if (!empty($arOffersSKU['IBLOCK_ID'])) {
+                $rsOfferIBlocks = CIBlock::GetByID($arOffersSKU['IBLOCK_ID']);
+                if (($arOfferIBlock = $rsOfferIBlocks->Fetch())) {
+                    $iblockOfferProps = CIBlockProperty::GetList(Array("sort" => "asc", "name" => "asc"), Array("ACTIVE" => "Y", "IBLOCK_ID" => $arOffersSKU['IBLOCK_ID']));
+                    while ($arResOffers = $iblockOfferProps->GetNext()) {
+                        if ($arOffersSKU["SKU_PROPERTY_ID"] == $arResOffers["ID"]) continue; // пропускаем свойство если оно является привязкой к инфоблоку
+
+                        $selectField = "";
+                        if ('offer@' . $arResOffers["CODE"] == $pName) $selectField = " selected";
+                        $strHTML_prop_sku .= '<option value="offer@' . $arResOffers["CODE"] . '"' . $selectField . '>[' . $arResOffers["CODE"] . '] ' . $arResOffers["NAME"] . '</option>';
+                    }
+                }
+            }
+            // ---/ Фильтр по свойствам SKU (если торговый каталог) ---
+        }
+
+        $strHTML = '<option value="">' . GetMessage("MIBIX_YAM_IRU_SEL_FILTER_NAME") . '</option>';
+        if (!empty($strHTML_main))
+            $strHTML .= '<optgroup label="' . GetMessage("MIBIX_YAM_IRU_SEL_FILTER_GROUP_MAIN") . ':">' . $strHTML_main . '</optgroup>';
+        if (!empty($strHTML_prop))
+            $strHTML .= '<optgroup label="' . GetMessage("MIBIX_YAM_IRU_SEL_FILTER_GROUP_SETTINGS") . ':">' . $strHTML_prop . '</optgroup>';
+        if(!empty($strHTML_prop_sku))
+            $strHTML .= '<optgroup label="'.GetMessage("MIBIX_YAM_IRU_SEL_FILTER_GROUP_SETTINGS_SKU").':">' . $strHTML_prop_sku .'</optgroup>';
+
+        if ($incSelect)
+            $strHTML = '<select name="f_filter_name[]" id="f_filter" size="1">'.$strHTML.'</select>&nbsp;';
 
         return $strHTML;
     }
@@ -482,12 +731,19 @@ class CMibixModelDataSource
         // Преобразуем поля для записи в базу
         if(!empty($arFields["include_sections"]))
             $arFields["include_sections"] = $this->MSelectPrepare($arFields["include_sections"]);
+        else $arFields["include_sections"] = "";
+
         if(!empty($arFields["exclude_sections"]))
             $arFields["exclude_sections"] = $this->MSelectPrepare($arFields["exclude_sections"]);
+        else $arFields["exclude_sections"] = "";
+
         if(!empty($arFields["include_items"]))
             $arFields["include_items"] = $this->MSelectPrepare($arFields["include_items"]);
+        else $arFields["include_items"] = "";
+
         if(!empty($arFields["exclude_items"]))
             $arFields["exclude_items"] = $this->MSelectPrepare($arFields["exclude_items"]);
+        else $arFields["exclude_items"] = "";
 
         $strUpdate = $DB->PrepareUpdate("b_mibix_yam_datasource", $arFields);
         if (strlen($strUpdate)>0)
@@ -613,7 +869,7 @@ class CMibixModelDataSource
 				SELECT count(".($from1 <> ""? "DISTINCT ds.id": "'x'").") as C
 				FROM
 					b_mibix_yam_datasource ds
-					JOIN b_mibix_yam_general g ON (ds.shop_id=g.id)
+					LEFT JOIN b_mibix_yam_general g ON (ds.shop_id=g.id)
 					$from1
 				WHERE
 				".$strSqlSearch;
@@ -630,7 +886,7 @@ class CMibixModelDataSource
 					g.name
 				FROM
 					b_mibix_yam_datasource ds
-				JOIN b_mibix_yam_general g ON (ds.shop_id=g.id)
+				LEFT JOIN b_mibix_yam_general g ON (ds.shop_id=g.id)
 					$from1
 				WHERE
 				$strSqlSearch
@@ -696,6 +952,13 @@ class CMibixModelDataSource
             elseif(strlen($arFields["name_data"]) > 255)
             {
                 $aMsg[] = array("id"=>"name_data", "text"=>GetMessage("MIBIX_YAM_ERR_DS_NAME_LIMIT255"));
+            }
+        }
+        if(is_set($arFields, "shop_id")) // Проверка: инфоблок
+        {
+            if($arFields["shop_id"] < 1)
+            {
+                $aMsg[] = array("id"=>"shop_id", "text"=>GetMessage("MIBIX_YAM_ERR_DS_SHOP_EMPTY"));
             }
         }
         if(is_set($arFields, "iblock_id")) // Проверка: инфоблок
@@ -765,7 +1028,7 @@ class CMibixModelRules
         $strHTML = '<select name="f_datasource_id" id="f_datasource_id" size="1">';
         $strHTML .= '<option value="">('.GetMessage("MIBIX_YAM_IRU_SEL_DS").')</option>';
 
-        $dbRes = $DB->Query("SELECT id, name_data FROM b_mibix_yam_datasource");
+        $dbRes = $DB->Query("SELECT id, name_data FROM b_mibix_yam_datasource WHERE active='Y'");
         while($arRes = $dbRes->Fetch())
         {
             $selectField = "";
@@ -1004,7 +1267,7 @@ class CMibixModelRules
             if(strlen($strIBlockHTML)>0)
             {
                 if($useGroup)
-                    $strHTML .= '<optgroup label="'.GetMessage("MIBIX_YAM_IRU_SEL_OPTGROUPPROP").(array_key_exists($pType, $arTypeInfo)?" ".$arTypeInfo[$pType]:"").':">'.$strIBlockHTML.'</optgroup>';
+                    $strHTML .= '<optgroup label="'.GetMessage("MIBIX_YAM_IRU_SEL_OPTGROUPPROP").($pType?((array_key_exists($pType, $arTypeInfo)?" ".$arTypeInfo[$pType]:"").':">'):':">') .$strIBlockHTML.'</optgroup>';
                 else
                     $strHTML .= $strIBlockHTML;
             }
@@ -1056,7 +1319,7 @@ class CMibixModelRules
                     if(strlen($strIBlockOffersHTML)>0)
                     {
                         if($useGroup)
-                            $strHTML .= '<optgroup label="'.GetMessage("MIBIX_YAM_IRU_SEL_OPTGROUPPROPSKU").(array_key_exists($pType, $arTypeInfo)?" ".$arTypeInfo[$pType]:"").':">'.$strIBlockOffersHTML.'</optgroup>';
+                            $strHTML .= '<optgroup label="'.GetMessage("MIBIX_YAM_IRU_SEL_OPTGROUPPROPSKU").($pType?((array_key_exists($pType, $arTypeInfo)?" ".$arTypeInfo[$pType]:"").':">'):':">').$strIBlockOffersHTML.'</optgroup>';
                         else
                             $strHTML .= $strIBlockOffersHTML;
                     }
@@ -1248,6 +1511,107 @@ class CMibixModelRules
 
         $strHTML .= '</div>';
         $strHTML .= '<div><a href="javascript:void(0);" id="param_add">'.GetMessage("MIBIX_YAM_IRU_SEL_ADDNEWPARAM").'</a></div>';
+
+        return $strHTML;
+    }
+
+    /**
+     * Контрол для вывода и добавления <delivery-options>
+     *
+     * @param $param_cost
+     * @param $param_days
+     * @param $param_before
+     * @return string
+     */
+    public function getControlDeliveryOptions($param_cost, $param_days, $param_before)
+    {
+        $strHTML = '<div id="div_do">';
+
+        // Если есть заполненные поля
+        if(count($param_cost)>0 && count($param_days)>0)
+        {
+            foreach($param_cost as $pKey=>$pCost)
+            {
+                // Проверки для значений элементов
+                if(!isset($param_days[$pKey])) continue;
+                if(!isset($param_before[$pKey])) $param_before[$pKey]="24";
+                $pDays = $param_days[$pKey];
+                $pBefore = $param_before[$pKey];
+
+                // Устанавливаем метку на первый элемент (на основе нее в js делаем копии при добавлении новых полей)
+                if($pKey==0)
+                    $strHTML .= '<div id="first_do">';
+                else
+                    $strHTML .= '<div>';
+
+                // остальные поля контрола
+                $strHTML .= '<input type="text" name="f_do_cost[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_DOCOST").'" value="'.$pCost.'" />&nbsp;';
+                $strHTML .= '<input type="text" name="f_do_days[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_DODAYS").'" value="'.$pDays.'" />&nbsp;';
+                $strHTML .= '<input type="text" name="f_do_before[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_DOBEFORE").'" value="'.$pBefore.'" />&nbsp;';
+                $strHTML .= '</div>';
+            }
+        }
+        else
+        {
+            $strHTML .= '<div id="first_do">';
+            $strHTML .= '<input type="text" name="f_do_cost[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_DOCOST").'" value="" />&nbsp;';
+            $strHTML .= '<input type="text" name="f_do_days[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_DODAYS").'" value="" />&nbsp;';
+            $strHTML .= '<input type="text" name="f_do_before[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_DOBEFORE").'" value="" />&nbsp;';
+            $strHTML .= '</div>';
+        }
+
+        $strHTML .= '</div>';
+        $strHTML .= '<div><a href="javascript:void(0);" id="do_add">'.GetMessage("MIBIX_YAM_IRU_SEL_ADDNEWPARAM").'</a></div>';
+
+        return $strHTML;
+    }
+    /**
+     * Контрол для вывода и добавления <outlets>
+     *
+     * @param $param_id
+     * @param $param_instock
+     * @param $param_booking
+     * @return string
+     */
+    public function getControlOutlets($param_id, $param_instock, $param_booking)
+    {
+        $strHTML = '<div id="div_outlets">';
+
+        // Если есть заполненные поля
+        if(count($param_id)>0)
+        {
+            foreach($param_id as $pKey=>$pId)
+            {
+                // Проверки для значений элементов
+                if(!isset($param_instock[$pKey])) $param_booking[$pKey]="0";
+                if(!isset($param_booking[$pKey])) $param_booking[$pKey]="true";
+                $pInstock = $param_instock[$pKey];
+                $pBooking = $param_booking[$pKey];
+
+                // Устанавливаем метку на первый элемент (на основе нее в js делаем копии при добавлении новых полей)
+                if($pKey==0)
+                    $strHTML .= '<div id="first_outlets">';
+                else
+                    $strHTML .= '<div>';
+
+                // остальные поля контрола
+                $strHTML .= '<input type="text" name="f_outlets_id[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_OLID").'" value="'.$pId.'" />&nbsp;';
+                $strHTML .= '<input type="text" name="f_outlets_instock[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_OLINSTOCK").'" value="'.$pInstock.'" />&nbsp;';
+                $strHTML .= '<input type="text" name="f_outlets_booking[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_OLBOOKING").'" value="'.$pBooking.'" />&nbsp;';
+                $strHTML .= '</div>';
+            }
+        }
+        else
+        {
+            $strHTML .= '<div id="first_outlets">';
+            $strHTML .= '<input type="text" name="f_outlets_id[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_OLID").'" value="" />&nbsp;';
+            $strHTML .= '<input type="text" name="f_outlets_instock[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_OLINSTOCK").'" value="" />&nbsp;';
+            $strHTML .= '<input type="text" name="f_outlets_booking[]" size="12" placeholder="'.GetMessage("MIBIX_YAM_IRU_SEL_OLBOOKING").'" value="" />&nbsp;';
+            $strHTML .= '</div>';
+        }
+
+        $strHTML .= '</div>';
+        $strHTML .= '<div><a href="javascript:void(0);" id="outlets_add">'.GetMessage("MIBIX_YAM_IRU_SEL_ADDNEWPARAM").'</a></div>';
 
         return $strHTML;
     }
@@ -1716,7 +2080,7 @@ class CMibixModelRules
 				SELECT count(".($from1 <> ""? "DISTINCT rs.id": "'x'").") as C
 				FROM
 					b_mibix_yam_rules rs
-				JOIN b_mibix_yam_datasource ds ON (rs.datasource_id=ds.id)
+				LEFT JOIN b_mibix_yam_datasource ds ON (rs.datasource_id=ds.id)
 					$from1
 				WHERE
 				".$strSqlSearch;
@@ -1733,7 +2097,7 @@ class CMibixModelRules
 					ds.name_data
 				FROM
 					b_mibix_yam_rules rs
-				JOIN b_mibix_yam_datasource ds ON (rs.datasource_id=ds.id)
+				LEFT JOIN b_mibix_yam_datasource ds ON (rs.datasource_id=ds.id)
 					$from1
 				WHERE
 				$strSqlSearch
@@ -1820,19 +2184,19 @@ class CMibixYandexExport
      * @param $STEP_LIMIT
      * @return bool
      */
-    public function CreateYML($YML_FILE, $STEP_LIMIT, $CRON=false)
+    public function CreateYML($YML_FILE, $STEP_LIMIT, $CRON=false, $SHOP_ID=1)
     {
         self::$bCreate = true;
 
         // текущее состояние выгрузки
-        $curStatus = self::get_step_status(1);
+        $curStatus = self::get_step_status($SHOP_ID);
         $TMP_YML_FILE = $YML_FILE . ".tmp";
 
         // если запуск через CRON + заполнено поле даты последней выгрузки (если нет, то делаем выгрузку без этих проверок)
         if($CRON && !empty($curStatus["last_run_time"]))
         {
             // Проверка, наступило ли время для срабатывания выгрузки
-            $stepTime = self::get_step_interval(1);
+            $stepTime = self::get_step_interval($SHOP_ID);
 
             // время последнего запуска + заданный интервал (в секундах)
             $next_time_run = strtotime($curStatus["last_run_time"]) + ($stepTime["step_interval_run"] * 60);
@@ -1843,14 +2207,14 @@ class CMibixYandexExport
         }
 
         // Проверка на подвисший скрипт (если
-        self::check_freeze_process(1);
+        self::check_freeze_process($SHOP_ID);
 
         // Проверка блокировки (если выгрузка уже проходит в данный момент)
         if($curStatus["in_blocked"] == "Y")
             return false;
 
         // Ставим блокировку (на случай повторного запуска скрипта во время выгрузки)
-        self::set_block_status("Y", 1);
+        self::set_block_status("Y", $SHOP_ID);
 
         // инициализация новой пошаговой выгрузки
         if($curStatus["in_proccess"] != "Y")
@@ -1865,7 +2229,7 @@ class CMibixYandexExport
                 @fwrite($fp, "<!DOCTYPE yml_catalog SYSTEM \"shops.dtd\">\n");
                 @fwrite($fp, "<yml_catalog date=\"".Date("Y-m-d H:i")."\">\n");
                 @fwrite($fp, "<shop>\n");
-                foreach(self::get_yml_shop() as $elShop)
+                foreach(self::get_yml_shop($SHOP_ID) as $elShop)
                 {
                     @fwrite($fp, $elShop . "\n");
                 }
@@ -1873,13 +2237,13 @@ class CMibixYandexExport
                 @fclose($fp);
 
                 // устанавливаем статус "в процессе" для сайта 1
-                self::set_proccess_status("Y", 1);
+                self::set_proccess_status("Y", $SHOP_ID);
 
                 // Снимаем блокировку
-                self::set_block_status("N", 1);
+                self::set_block_status("N", $SHOP_ID);
 
                 // Обновление времени шага
-                self::update_last_time_step(1);
+                self::update_last_time_step($SHOP_ID);
 
                 return true;
             }
@@ -1896,7 +2260,7 @@ class CMibixYandexExport
                 if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT==true)
                     self::writeLOG("[INFO] function:".__FUNCTION__." (STEP_1)", self::$bStepEnd);
 
-                foreach(self::get_yml_offers($STEP_LIMIT) as $elOffer)
+                foreach(self::get_yml_offers($STEP_LIMIT, $SHOP_ID) as $elOffer)
                 {
                     @fwrite($fp, $elOffer . "\n");
                 }
@@ -1916,10 +2280,10 @@ class CMibixYandexExport
                     @fclose($fp);
 
                     // Снимаем блокировку
-                    self::set_block_status("N", 1);
+                    self::set_block_status("N", $SHOP_ID);
 
                     // Обновление времени шага
-                    self::update_last_time_step(1);
+                    self::update_last_time_step($SHOP_ID);
 
                     return true;
                 }
@@ -1936,16 +2300,16 @@ class CMibixYandexExport
                     rename($TMP_YML_FILE, $YML_FILE);
 
                     // чистим историю пошаговой выгрузки
-                    self::steps_update(0,0,0,0,0);
+                    self::steps_update(0,0,0,0,0,$SHOP_ID);
 
                     // устанавливаем статус "завершено" для сайта 1
-                    self::set_proccess_status("N", 1);
+                    self::set_proccess_status("N", $SHOP_ID);
 
                     // ставим временную метку окончания выгрузки для сайта 1
-                    self::set_last_time_run(1);
+                    self::set_last_time_run($SHOP_ID);
 
                     // Обновление времени шага
-                    self::update_last_time_step(1);
+                    self::update_last_time_step($SHOP_ID);
                 }
             }
             //else
@@ -1955,19 +2319,21 @@ class CMibixYandexExport
         }
 
         // Снимаем блокировку
-        self::set_block_status("N", 1);
+        self::set_block_status("N", $SHOP_ID);
 
         // возврат ф-ии исп в ajax
         return false;
     }
 
     // Генерация YML файла "на лету"
-    public function GetYML()
+    public function GetYML($SHOP_ID=1)
     {
         self::$bCreate = false;
 
         // чистка на случай не законченной генерации пошаговой выгрузки
-        self::steps_update_noncheck(0,0,0,0,0);
+        self::steps_update_noncheck(0,0,0,0,0,$SHOP_ID);
+
+        ob_clean(); // очищаем буфер вывода
 
         // Устанавливаем заголовок
         header("Content-Type: text/xml; charset=windows-1251");
@@ -1975,12 +2341,12 @@ class CMibixYandexExport
         echo "<!DOCTYPE yml_catalog SYSTEM \"shops.dtd\">\n";
         echo "<yml_catalog date=\"".Date("Y-m-d H:i")."\">\n";
         echo "<shop>\n";
-        foreach(self::get_yml_shop() as $elShop)
+        foreach(self::get_yml_shop($SHOP_ID) as $elShop)
         {
             echo $elShop . "\n";
         }
         echo "<offers>\n";
-        foreach(self::get_yml_offers() as $elOffer)
+        foreach(self::get_yml_offers(0, $SHOP_ID) as $elOffer)
         {
             echo $elOffer . "\n";
         }
@@ -2001,7 +2367,7 @@ class CMibixYandexExport
 
         // Ищем в настройках параметры для доступа к соц.сетям
         $arShopData = array();
-        $rsShop = $DB->Query("SELECT name,company,salon,url,platform_version,agency,email,local_delivery_cost,cpa,adult,currency_rate,currency_rub,currency_rub_plus,currency_byr,currency_byr_plus,currency_uah,currency_uah_plus,currency_kzt,currency_kzt_plus,currency_usd,currency_usd_plus,currency_eur,currency_eur_plus FROM b_mibix_yam_general WHERE id='".$shop_id."' AND active='Y'", true);
+        $rsShop = $DB->Query("SELECT name,company,salon,url,platform_version,agency,email,local_delivery_cost,do_cost,do_days,do_before,cpa,adult,currency_rate,currency_rub,currency_rub_plus,currency_byr,currency_byr_plus,currency_uah,currency_uah_plus,currency_kzt,currency_kzt_plus,currency_usd,currency_usd_plus,currency_eur,currency_eur_plus FROM b_mibix_yam_general WHERE id='".$shop_id."' AND active='Y'", true);
         if ($rowShop = $rsShop->Fetch())
         {
             // Определяем кодировку сайта
@@ -2053,6 +2419,16 @@ class CMibixYandexExport
                 $arShopData["categories"] .= "\n".$cur;
             }
             $arShopData["categories"] .= "\n</categories>";
+
+            // курьерская доставка
+            if(strlen($rowShop["do_cost"])>0 && strlen($rowShop["do_days"])>0)
+            {
+                $tmpDoBefore = "";
+                if (strlen($rowShop["do_before"])>0)
+                    $tmpDoBefore = " order-before=\"".$rowShop["do_before"]."\"";
+
+                $arShopData["deliveryoptions"] = "<delivery-options><option cost=\"".$rowShop["do_cost"]."\" days=\"".$rowShop["do_days"]."\"".$tmpDoBefore."/></delivery-options>";
+            }
 
             // цена доставки
             if(strlen($rowShop["local_delivery_cost"])>0)
@@ -2202,7 +2578,7 @@ class CMibixYandexExport
         $arCategories = array();
         foreach($arIBlocks as $iblock_id)
         {
-            self::$intMaxSectionID[$iblock_id] = 0;
+            self::$intMaxSectionID[$iblock_id] = $iblock_id;
 
             $rsSections = CIBlockSection::GetList(array('LEFT_MARGIN'=>'ASC'), array('IBLOCK_ID'=>$iblock_id));
             while ($arSection = $rsSections->Fetch())
@@ -2226,7 +2602,7 @@ class CMibixYandexExport
     /**
      * Получаем офферов, на основе всех правил и прикрепленных к ним источников данных
      */
-    private function get_yml_offers($STEP_LIMIT=0)
+    private function get_yml_offers($STEP_LIMIT=0, $SHOP_ID=1)
     {
         global $DB;
 
@@ -2246,7 +2622,7 @@ class CMibixYandexExport
             self::writeLOG("[INFO] function:".__FUNCTION__." (nTopCount)", $nTopCount);
 
         // Параметры из таблицы текущего шага выгрузки
-        $arSaveSteps = self::get_save_steps(1);
+        $arSaveSteps = self::get_save_steps($SHOP_ID);
 
         // DEBUG
         if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT==true)
@@ -2263,7 +2639,7 @@ class CMibixYandexExport
 				JOIN b_mibix_yam_rules r ON (ds.id=r.datasource_id)
 				JOIN b_mibix_yam_general g ON (ds.shop_id=g.id)
 				WHERE
-                    ds.active = 'Y' AND r.active = 'Y' AND r.id >= ".$arSaveSteps["rule_id"]."
+                    ds.active = 'Y' AND ds.shop_id = ".$SHOP_ID." AND r.active = 'Y' AND r.id >= ".$arSaveSteps["rule_id"]."
                 ORDER BY r.id ASC";
         $dbRulesRes = $DB->Query($strRulesSQL);
         while($arRule = $dbRulesRes->Fetch())
@@ -2286,11 +2662,19 @@ class CMibixYandexExport
                 "ACTIVE"=>"Y"
             );
 
+            // Проверяем, есть ли у инфоблока разделы
+            $iblockSectionExist = false;
+            $rsSecExistSections = CIBlockSection::GetList(Array(), Array("IBLOCK_ID"=>IntVal($arRule["iblock_id"])), false, Array("ID"));
+            while ($arSecExitRes = $rsSecExistSections->GetNext())
+            {
+                $iblockSectionExist = true;
+            }
+
             // Обновляем данные параметров из таблицы текущего шага выгрузки
-            $arSaveSteps = self::get_save_steps(1);
+            $arSaveSteps = self::get_save_steps($SHOP_ID);
 
             // Прервался ли шаг на элементе со SKU? Если да, то продолжаем использовать ID основного элемента (условие ">=")
-            if(self::steps_include_sku(1))
+            if(self::steps_include_sku($SHOP_ID))
                 $arFilterOffers[">=ID"] = $arSaveSteps["element_id"];
             else
                 $arFilterOffers[">ID"] = $arSaveSteps["element_id"];
@@ -2336,35 +2720,78 @@ class CMibixYandexExport
                 $arItem = $obItem->GetFields();
                 $arItem["PROPERTIES"] = $obItem->GetProperties();
 
-                //TODO: если товар прикреплен к нескольким разделам?
-                // === Включаем только те элементы, которые пользователь установил в настройках ===
-                // Если элемент явно указан пользователем в настройках правила, то остальные проверки не производим
-                if(empty($arIncItems) || !in_array($arItem["ID"], $arIncItems))
+                // Находим все группы, принадлежащие элементу
+                $arItemGroups = Array();
+                if(IntVal($arItem["IBLOCK_SECTION_ID"]) > 0)
+                    $arItemGroups[] = $arItem["IBLOCK_SECTION_ID"];
+
+                $dbGroups = CIBlockElement::GetElementGroups($arItem["ID"], true);
+                while($arGroup = $dbGroups->Fetch())
                 {
-                    // Пропускаем элемент, если он явно указан в списке исключаемых
-                    if(count($arExcItems)>0 && in_array($arItem["ID"], $arExcItems))
-                    {
-                        $emptyItem = true;
-                    }
+                    $arItemGroups[] = $arGroup["ID"];
+                }
 
-                    // Пропускаем элемент, если он не принадлежит разделам, которые выбрал пользователь
-                    if(intval($arItem["IBLOCK_SECTION_ID"])>0 && count($arIncSections)>0 && !in_array($arItem["IBLOCK_SECTION_ID"], $arIncSections))
-                    {
-                        $emptyItem = true;
-                    }
+                // === ФИЛЬТРАЦИЯ ПО РАЗДЕЛАМ И ЭЛЕМЕНТАМ ===
+                if ($iblockSectionExist) { // только в случае, когда у инфоблока есть разделы
 
-                    // Пропускаем элемент, если он принадлежит разделу, который пользователь установил исключить
-                    if(in_array($arItem["IBLOCK_SECTION_ID"], $arExcSections))
-                    {
+                    // DEBUG
+                    if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT == true)
+                        self::writeLOG("[INFO] function:" . __FUNCTION__ . " (SECTION_EXIST)", $iblockSectionExist);
+
+                    // Пропускаем элемент если он не принадленит ни одному разделу
+                    if (empty($arItemGroups)) {
                         $emptyItem = true;
+
+                        // DEBUG
+                        if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT == true)
+                            self::writeLOG("[INFO] function:" . __FUNCTION__ . " (EMPTY_SECTION)", $emptyItem);
+                    } // Если не выбран ни один раздел и явно не указан элемент, то не фильтруем
+                    elseif (empty($arIncSections) && !in_array($arItem["ID"], $arIncItems)) {
+                        $emptyItem = true;
+
+                        // DEBUG
+                        if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT == true)
+                            self::writeLOG("[INFO] function:" . __FUNCTION__ . " (EMPTY_SECTION_AND_NOT_ELEMENT_SELECT)", $emptyItem);
+                    } // Не фильтруем элемент если явно выбран пользователем в список включенных
+                    elseif (empty($arIncItems) || !in_array($arItem["ID"], $arIncItems)) {
+                        // Пропускаем элемент, если он явно указан в списке исключаемых
+                        if (count($arExcItems) > 0 && in_array($arItem["ID"], $arExcItems))
+                            $emptyItem = true;
+
+                        // DEBUG
+                        if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT == true) {
+                            self::writeLOG("[INFO] function:" . __FUNCTION__ . " (USER_EXCLUDED_ELEMENT)", $emptyItem);
+                            self::writeLOG("[INFO] function:" . __FUNCTION__ . " (ELEMENT_SECTIONS)", $arItemGroups);
+                        }
+
+                        if (!$emptyItem) {
+                            // Обходим все разделы, принадлежающие элементу
+                            foreach ($arItemGroups as $itemGroupID) {
+                                if ($itemGroupID > 0) {
+                                    // Пропускаем элемент, если он не принадлежит хотя бы одному разделу, которые выбрал пользователь
+                                    if (count($arIncSections) > 0 && !in_array($itemGroupID, $arIncSections)) {
+                                        $emptyItem = true;
+                                    } else { // Если все же есть раздел, который выбрал пользователь, то отменяем предыдущее условие и выходим из цикла
+                                        $emptyItem = false;
+                                        break;
+                                    }
+
+                                    // Пропускаем элемент, если он принадлежит хотя бы одному разделу, который пользователь установил в исключениях
+                                    if (count($arExcSections) > 0 && in_array($itemGroupID, $arExcSections))
+                                        $emptyItem = true;
+                                }
+                            }
+                        }
                     }
                 }
+                // === ~ФИЛЬТРАЦИЯ ПО РАЗДЕЛАМ И ЭЛЕМЕНТАМ ===
 
                 // DEBUG
                 if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT==true)
                 {
                     self::writeLOG("[INFO] function:" . __FUNCTION__ . " (COUNTER_1)", $COUNTER);
                     self::writeLOG("[INFO] function:" . __FUNCTION__ . " (STEP_4)", self::$bStepEnd);
+                    self::writeLOG("[INFO] function:" . __FUNCTION__ . " (EMPTY_ITEM)", $emptyItem);
                 }
 
                 // Получаем YML-описание в зависимости от типа элемента
@@ -2379,7 +2806,7 @@ class CMibixYandexExport
                         self::writeLOG("[INFO] function:".__FUNCTION__." (CATALOG_TYPE)", "SKU");
 
                     // Получаем YML-описание для элемента offer и его торговых предложений, если они есть
-                    $arTmpOffersSku = self::get_yml_offer_sku($intOfferIBlockID, $arOffersSKU['SKU_PROPERTY_ID'], $arRule, $arItem, $nTopCount, $COUNTER, $arSaveSteps);
+                    $arTmpOffersSku = self::get_yml_offer_sku($intOfferIBlockID, $arOffersSKU['SKU_PROPERTY_ID'], $arRule, $arItem, $nTopCount, $COUNTER, $arSaveSteps, $SHOP_ID);
                     if(!empty($arTmpOffersSku))
                         $arOffers = array_merge($arOffers, $arTmpOffersSku);
                 }
@@ -2402,6 +2829,7 @@ class CMibixYandexExport
                 {
                     self::writeLOG("[INFO] function:" . __FUNCTION__ . " (COUNTER_2)", $COUNTER);
                     self::writeLOG("[INFO] function:" . __FUNCTION__ . " (STEP_5)", self::$bStepEnd);
+                    self::writeLOG("[INFO] function:" . __FUNCTION__ . " (STEP_OFFER_COUNTS)", $arOffers);
                 }
 
                 // проверяем, сгенерирован ли через sku весь допустимый лимит элементов
@@ -2413,7 +2841,7 @@ class CMibixYandexExport
                 {
                     // запись в базу текущего состояния генерируемого элемента
                     $elementID = IntVal($arItem["ID"]);
-                    self::steps_update($arRule["id"], $arRule["iblock_id"], $elementID);
+                    self::steps_update($arRule["id"], $arRule["iblock_id"], $elementID, 0, 0, $SHOP_ID);
 
                     // проверка лимита шага
                     if(is_array($nTopCount) && isset($nTopCount["nTopCount"]) && intval($nTopCount["nTopCount"])>0)
@@ -2433,7 +2861,7 @@ class CMibixYandexExport
 
             } // while end elements of rule
 
-            self::steps_update($arRule["id"], $arRule["iblock_id"], 0);
+            self::steps_update($arRule["id"], $arRule["iblock_id"], 0, 0, 0, $SHOP_ID);
 
         } // while end rules
 
@@ -2449,14 +2877,12 @@ class CMibixYandexExport
      * @param int $skuIBlockID
      * @param int $skuElementID
      */
-    private function steps_update($ruleID, $IBlockID, $elementID, $skuIBlockID=0, $skuElementID=0)
+    private function steps_update($ruleID, $IBlockID, $elementID, $skuIBlockID=0, $skuElementID=0, $shop=1)
     {
-        global $DB;
-
         // выход, если выбран метод прямого получения файла (без шаговой генерации)
         if(!self::$bCreate) return;
 
-        self::steps_update_noncheck($ruleID, $IBlockID, $elementID, $skuIBlockID, $skuElementID);
+        self::steps_update_noncheck($ruleID, $IBlockID, $elementID, $skuIBlockID, $skuElementID, $shop);
     }
 
     /**
@@ -2469,7 +2895,7 @@ class CMibixYandexExport
      * @param int $skuIBlockID
      * @param int $skuElementID
      */
-    private function steps_update_noncheck($ruleID, $IBlockID, $elementID, $skuIBlockID=0, $skuElementID=0)
+    private function steps_update_noncheck($ruleID, $IBlockID, $elementID, $skuIBlockID=0, $skuElementID=0, $shop=1)
     {
         global $DB;
 
@@ -2480,7 +2906,7 @@ class CMibixYandexExport
             "sku_iblock_id" => $skuIBlockID,
             "sku_element_id" => $skuElementID,
         );
-        $dbResYMC = $DB->Query("SELECT id FROM b_mibix_yam_steps_load WHERE id='1'");
+        $dbResYMC = $DB->Query("SELECT id FROM b_mibix_yam_steps_load WHERE id='".$shop."'");
         if($dbArYMC = $dbResYMC->Fetch()) // update
         {
             $strStepsUpdateSQL = $DB->PrepareUpdate("b_mibix_yam_steps_load", $arSaveField);
@@ -2500,17 +2926,17 @@ class CMibixYandexExport
     /**
      * Шаг прервался на элементе SKU?
      *
-     * @param int $site
+     * @param int $shop
      * @return bool
      */
-    private function steps_include_sku($site=1)
+    private function steps_include_sku($shop=1)
     {
         global $DB;
 
         // выход, если выбран метод прямого получения файла (без шаговой генерации)
         if(!self::$bCreate) return false;
 
-        $dbResYMC = $DB->Query("SELECT sku_element_id FROM b_mibix_yam_steps_load WHERE id='".$site."'");
+        $dbResYMC = $DB->Query("SELECT sku_element_id FROM b_mibix_yam_steps_load WHERE id='".$shop."'");
         if($dbArYMC = $dbResYMC->Fetch())
         {
             if(intval($dbArYMC["sku_element_id"])>0) return true;
@@ -2578,8 +3004,11 @@ class CMibixYandexExport
         $dbStepsLoadRes = $DB->Query("SELECT step_limit,step_path FROM b_mibix_yam_general WHERE id='".$shop."'");
         if ($arStepsLoadRes = $dbStepsLoadRes->Fetch())
         {
-            $arStep["step_limit"] = $arStepsLoadRes["step_limit"];
-            $arStep["step_path"] = $arStepsLoadRes["step_path"];
+            if (!empty($arStepsLoadRes["step_limit"]) && !empty($arStepsLoadRes["step_path"]))
+            {
+                $arStep["step_limit"] = $arStepsLoadRes["step_limit"];
+                $arStep["step_path"] = $arStepsLoadRes["step_path"];
+            }
         }
 
         return $arStep;
@@ -2605,7 +3034,7 @@ class CMibixYandexExport
             "sku_iblock_id" => 0,
             "sku_element_id" => 0,
         );
-        $dbStepsLoadRes = $DB->Query("SELECT * FROM b_mibix_yam_steps_load WHERE id='1'");
+        $dbStepsLoadRes = $DB->Query("SELECT * FROM b_mibix_yam_steps_load WHERE id='".$shop."'");
         if ($arStepsLoadRes = $dbStepsLoadRes->Fetch())
         {
             $arSaveSteps = $arStepsLoadRes;
@@ -2702,7 +3131,7 @@ class CMibixYandexExport
      * @param $arSaveSteps array Массив с данными поэтапоной выгрузки
      * @return string Элемент <offer> с заполненными значениями согласно типу
      */
-    private function get_yml_offer_sku($skuIBlockID, $skuPropertyID, $arRule, $arItem, $nTopCount, &$COUNTER, $arSaveSteps)
+    private function get_yml_offer_sku($skuIBlockID, $skuPropertyID, $arRule, $arItem, $nTopCount, &$COUNTER, $arSaveSteps, $SHOP_ID=1)
     {
         $arOffers = array();
         $existOffers = false;
@@ -2736,7 +3165,7 @@ class CMibixYandexExport
 
                 // запись в базу текущего состояния генерируемого элемента
                 $elementID = IntVal($arItem["ID"]);
-                self::steps_update($arRule["id"], $arRule["iblock_id"], $elementID, $skuIBlockID, $arOfferItem["ID"]);
+                self::steps_update($arRule["id"], $arRule["iblock_id"], $elementID, $skuIBlockID, $arOfferItem["ID"], $SHOP_ID);
 
                 // увеличиваем счетчик до проверки лимита шага
                 $COUNTER++;
@@ -2779,7 +3208,7 @@ class CMibixYandexExport
 
             // запись в базу текущего состояния генерируемого элемента
             $elementID = IntVal($arItem["ID"]);
-            self::steps_update($arRule["id"], $arRule["iblock_id"], $elementID);
+            self::steps_update($arRule["id"], $arRule["iblock_id"], $elementID, 0, 0, $SHOP_ID);
 
             $COUNTER++;
         }
@@ -2807,6 +3236,10 @@ class CMibixYandexExport
         // Проверка пользовательской фильтрации
         if(!self::check_filter($arRule, $arItem, $arOfferItemSKU))
             return $strOffers;
+
+        // DEBUG
+        if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT==true)
+            self::writeLOG("[INFO] function:".__FUNCTION__." (CHECK_FILTER)", true);
 
         // Определяем тип по Я.Маркету и возвращем значение
         $yType = '';
@@ -2893,21 +3326,17 @@ class CMibixYandexExport
         if($arRule["salon"]=="Y" && $arRule["url"]!="Y") {}
         else
         {
-            // если есть на конце слеш, то обрезаем его
-            if(substr($arRule["url_shop"], -1) == '/')
-            {
-                $arRule["url_shop"] = substr($arRule["url_shop"], 0, strlen($arRule["url_shop"])-1);
-            }
-
             // Формируем ссылку
             $tmpURL = $arItem["DETAIL_PAGE_URL"];
             $outURL = htmlspecialcharsbx($arItem["~DETAIL_PAGE_URL"]);
-            // Если пользователь выбрал брать ссылку на товар из SKU-элементов
+
+            // Если пользователь выбрал "брать ссылку на товар из SKU-элементов"
             if(!empty($arOfferItemSKU) && $arRule["dpurl_use_sku"]=="Y")
             {
                 $tmpURL = $arOfferItemSKU["DETAIL_PAGE_URL"];
                 $outURL = htmlspecialcharsbx($arOfferItemSKU["~DETAIL_PAGE_URL"]);
             }
+
             // UTM-метка если есть
             if(strlen($arRule["utm"]))
             {
@@ -2922,19 +3351,14 @@ class CMibixYandexExport
 
                 $outURL = $outURL . (strstr($tmpURL, '?') === false ? '?' : '&amp;') . $arRule["utm"];
             }
+
             // Уникальная ссылка для торгового предложения
             if(!empty($arOfferItemSKU))
             {
                 $outURL = $outURL . (strstr($outURL, '?') === false ? '?' : '&amp;') . "offer=" . $arOfferItemSKU["ID"];
             }
 
-            // если в ссылке отсутствует впереде слеш, то добавляем его.
-            if(substr($outURL, 0, 1) != '/')
-            {
-                $outURL = "/" . $outURL;
-            }
-
-            $strReturn = "<url>".$arRule["url_shop"].$outURL."</url>";
+            $strReturn = "<url>".CMibixYandexTools::getFixURL($arRule["url_shop"], $outURL, false)."</url>";
         }
 
         return $strReturn;
@@ -2980,7 +3404,7 @@ class CMibixYandexExport
         // Формирование тега <price>
         if(is_numeric($arRule["price"])) // выбран тип цены
         {
-            $arReturn = self::get_need_price($tmpItemID, $arRule["price"], $arItem["LID"], $arRule["price_optimal"]);
+            $arReturn = array_merge($arReturn, self::get_need_price($tmpItemID, $arRule["price"], $arItem["LID"], $arRule["price_optimal"]) );
             $minPrice = $arReturn["minprice"];
         }
         else // выбрано свойство
@@ -3219,10 +3643,7 @@ class CMibixYandexExport
                             }
                         } elseif($arProperty["PROPERTY_TYPE"]=="S" && strlen($arProperty["VALUE"])) {
 
-                            if(preg_match("/^(http|https):\\/\\/(.*?)\\/(.*)\$/", $arProperty["VALUE"], $match))
-                                $arReturn[] = "<picture>http://".$match[2].'/'.implode("/", array_map("rawurlencode", explode("/", $match[3])))."</picture>";
-                            else
-                                $arReturn[] = "<picture>".$arProperty["VALUE"]."</picture>";
+                            $arReturn[] = "<picture>".CMibixYandexTools::getFixURL($arRule["url_shop"], $arProperty["VALUE"])."</picture>";
                         }
                     }
                 }
@@ -3285,17 +3706,17 @@ class CMibixYandexExport
                 if(strlen($arItem["PREVIEW_TEXT"]))
                 {
                     if(strlen($arItem["PREVIEW_TEXT"]))
-                        $strReturn = self::yandex_text2xml($arItem["~PREVIEW_TEXT"], true, false, true, 255);
+                        $strReturn = self::yandex_text2xml($arItem["~PREVIEW_TEXT"], true, false, true, 3000);
                 }
             }
             elseif($arRule["description"] == "DETAIL_TEXT")
             {
                 if(strlen($arItem["DETAIL_TEXT"]))
-                    $strReturn = self::yandex_text2xml($arItem["~DETAIL_TEXT"], true, false, true, 255);
+                    $strReturn = self::yandex_text2xml($arItem["~DETAIL_TEXT"], true, false, true, 3000);
             }
             else
             {
-                if($strTag = self::get_property_value($arRule["description"], $arItem, true, 255, $arOfferItemSKU))
+                if($strTag = self::get_property_value($arRule["description"], $arItem, true, 3000, $arOfferItemSKU))
                     if(strlen($strTag))
                         $strReturn = $strTag;
             }
@@ -3425,6 +3846,107 @@ class CMibixYandexExport
     }
 
     /**
+     * Получаем yml для <delivery-options>
+     *
+     * @param $arRule array Массив со значениями правила
+     * @return string
+     */
+    private function get_yml_offer_do($arRule)
+    {
+        $strReturn = "";
+
+        if(strlen($arRule["deliveryoptions"])>0)
+        {
+            // из строки формируем массив параметров
+            $arParams = explode("|", $arRule["deliveryoptions"]);
+            if(count($arParams)>0)
+            {
+                $strDO = "";
+
+                foreach($arParams as $str_param)
+                {
+                    // формируем отдельный массива для элементов каждого параметра
+                    $arParamElements = explode(",", $str_param);
+                    if(count($arParamElements)==3)
+                    {
+                        // если нет стоимости или срока доставки, то не формируем тег
+                        if(!isset($arParamElements[0]) || !strlen($arParamElements[0])) continue;
+                        if(!isset($arParamElements[1]) || !strlen($arParamElements[1])) continue;
+
+                        // значение unit (необязательный)
+                        $param2 = "";
+                        if(!empty($arParamElements[2]))
+                        {
+                            $param2 = " order-before=\"".$arParamElements[2]."\"";
+                        }
+
+                        // формируем тег
+                        $strDO .= "<option cost=\"".$arParamElements[0]."\" days=\"".$arParamElements[1]."\"".$param2."/>\n";
+                    }
+                }
+
+                if (strlen($strDO)>0)
+                    $strReturn = "<delivery-options>" . $strDO . "</delivery-options>";
+            }
+        }
+
+        return $strReturn;
+    }
+
+    /**
+     * Получаем yml для <outlets>
+     *
+     * @param $arRule array Массив со значениями правила
+     * @return string
+     */
+    private function get_yml_offer_outlets($arRule)
+    {
+        $strReturn = "";
+
+        if(strlen($arRule["outlets"])>0)
+        {
+            // из строки формируем массив параметров
+            $arParams = explode("|", $arRule["outlets"]);
+            if(count($arParams)>0)
+            {
+                $strDO = "";
+
+                foreach($arParams as $str_param)
+                {
+                    // формируем отдельный массива для элементов каждого параметра
+                    $arParamElements = explode(",", $str_param);
+                    if(count($arParamElements)==3)
+                    {
+                        // если нет стоимости или срока доставки, то не формируем тег
+                        if(!isset($arParamElements[0]) || !strlen($arParamElements[0])) continue;
+
+                        // значение instock (необязательный)
+                        $param1 = "";
+                        if(!empty($arParamElements[1]))
+                        {
+                            $param1 = " instock=\"".$arParamElements[1]."\"";
+                        }
+                        // значение booking (необязательный)
+                        $param2 = "";
+                        if(!empty($arParamElements[2]))
+                        {
+                            $param2 = " booking=\"".$arParamElements[2]."\"";
+                        }
+
+                        // формируем тег
+                        $strDO .= "<outlet id=\"".$arParamElements[0]."\"".$param1.$param2."/>\n";
+                    }
+                }
+
+                if (strlen($strDO)>0)
+                    $strReturn = "<outlets>" . $strDO . "</outlets>";
+            }
+        }
+
+        return $strReturn;
+    }
+
+    /**
      * Формирует YML-offer типа "Упрощенное описание"
      *
      * @param $arRule array Массив со значениями правила
@@ -3482,6 +4004,11 @@ class CMibixYandexExport
 
         // <delivery> (Возможность доставки)
         $tagTmp = self::get_property_value_tag("delivery", $arRule["delivery"], $arItem, $arOfferItemSKU);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
@@ -3552,6 +4079,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem = array_merge($arOfferElem, $tagTmp);
 
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         return $arOfferElem;
     }
 
@@ -3612,6 +4144,11 @@ class CMibixYandexExport
 
         // <delivery> (Возможность доставки)
         $tagTmp = self::get_property_value_tag("delivery", $arRule["delivery"], $arItem, $arOfferItemSKU);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
@@ -3715,6 +4252,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem = array_merge($arOfferElem, $tagTmp);
 
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         return $arOfferElem;
     }
 
@@ -3774,6 +4316,11 @@ class CMibixYandexExport
 
         // <delivery> (Возможность доставки)
         $tagTmp = self::get_property_value_tag("delivery", $arRule["delivery"], $arItem, $arOfferItemSKU);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
@@ -3856,6 +4403,11 @@ class CMibixYandexExport
 
         // <age> (Возрастные ограничения)
         $tagTmp = self::get_yml_offer_age($arRule, $arItem, $arOfferItemSKU);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
@@ -3998,6 +4550,16 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         return $arOfferElem;
     }
 
@@ -4061,6 +4623,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         // <artist> (Исполнитель)
         $tagTmp = self::get_property_value_tag("artist", $arRule["artist"], $arItem, $arOfferItemSKU);
         if(!empty($tagTmp))
@@ -4102,6 +4669,11 @@ class CMibixYandexExport
         $tagTmp = self::get_yml_offer_barcode($arRule, $arItem, $arOfferItemSKU);
         if(!empty($tagTmp))
             $arOfferElem = array_merge($arOfferElem, $tagTmp);
+
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
 
         return $arOfferElem;
     }
@@ -4166,6 +4738,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         // <title> (Название фильма - обязательное)
         $tagTmp = self::get_yml_offer_name($arRule["title"], $arItem, $arOfferItemSKU);
         if(!empty($tagTmp))
@@ -4222,6 +4799,11 @@ class CMibixYandexExport
         $tagTmp = self::get_yml_offer_barcode($arRule, $arItem, $arOfferItemSKU);
         if(!empty($tagTmp))
             $arOfferElem = array_merge($arOfferElem, $tagTmp);
+
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
 
         return $arOfferElem;
     }
@@ -4282,6 +4864,11 @@ class CMibixYandexExport
 
         // <delivery> (Возможность доставки)
         $tagTmp = self::get_property_value_tag("delivery", $arRule["delivery"], $arItem, $arOfferItemSKU);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
@@ -4357,6 +4944,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         return $arOfferElem;
     }
 
@@ -4419,6 +5011,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
+        // <delivery-options> (Стоимость и сроки курьерской доставки)
+        $tagTmp = self::get_yml_offer_do($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         // <name> (Название - обязательное)
         $tagTmp = self::get_yml_offer_name($arRule["name"], $arItem, $arOfferItemSKU);
         if(!empty($tagTmp))
@@ -4466,6 +5063,11 @@ class CMibixYandexExport
         if(!empty($tagTmp))
             $arOfferElem[] = $tagTmp;
 
+        // <outlets> (Точки продаж и количество товара)
+        $tagTmp = self::get_yml_offer_outlets($arRule);
+        if(!empty($tagTmp))
+            $arOfferElem[] = $tagTmp;
+
         return $arOfferElem;
     }
 
@@ -4480,30 +5082,16 @@ class CMibixYandexExport
     private function get_yml_picture_by_code($pictNo, $urlShop, $showTag=true)
     {
         $strFile = '';
-        if ($arFile = CFile::GetFileArray($pictNo))
-        {
-            if(substr($arFile["SRC"], 0, 1) == "/")
-            {
-                if (substr($urlShop, -1) == '/') // проверка на двойной слеш в $urlShop
-                {
-                    $urlShop = substr($urlShop, 0, -1);
-                }
-                $strFile = $urlShop.implode("/", array_map("rawurlencode", explode("/", $arFile["SRC"])));
-            }
-            elseif(preg_match("/^(http|https):\\/\\/(.*?)\\/(.*)\$/", $arFile["SRC"], $match))
-                $strFile = "http://".$match[2].'/'.implode("/", array_map("rawurlencode", explode("/", $match[3])));
-            else
-                $strFile = $arFile["SRC"];
-        }
-        if (!empty($strFile))
-        {
-            if($showTag)
-                return "<picture>".$strFile."</picture>";
-            else
-                return $strFile;
-        }
 
-        return '';
+        // получаем ссылку по номеру файла
+        if ($arFile = CFile::GetFileArray($pictNo))
+            $strFile = CMibixYandexTools::getFixURL($urlShop, $arFile["SRC"]);
+
+        // если заполнена ссылка и нужно верунть тег
+        if (!empty($strFile) && $showTag)
+            return "<picture>".$strFile."</picture>";
+
+        return $strFile;
     }
 
     /**
@@ -4777,6 +5365,10 @@ class CMibixYandexExport
             $arFilters = explode("|", $arRule["filters"]);
             if(count($arFilters)>0)
             {
+                // DEBUG
+                if (defined('MIBIX_DEBUG_YAMEXPORT') && MIBIX_DEBUG_YAMEXPORT==true)
+                    self::writeLOG("[INFO] function:".__FUNCTION__." (arFilters)", $arFilters);
+
                 // проходимся по каждому правилу
                 foreach($arFilters as $str_filter)
                 {
@@ -4788,6 +5380,58 @@ class CMibixYandexExport
                         if(!isset($arParamFilters[0]) || !strlen($arParamFilters[0])) continue;
                         if(!isset($arParamFilters[1]) || !strlen($arParamFilters[1])) continue;
                         if(!isset($arParamFilters[2]) || !strlen($arParamFilters[2])) continue;
+
+                        // Фильтр по шаблонам свойств инфоблока и SKU
+                        if (preg_match("/^offer@(.*?)/isU", $arParamFilters[0], $matches))
+                        {
+                            if(!empty($matches) && isset($matches[1]) && !empty($arOfferItemSKU))
+                            {
+                                $arProperty = $arOfferItemSKU["PROPERTIES"][$matches[1]];
+                            }
+                        }
+                        elseif (preg_match("/^prop@(.*?)/isU", $arParamFilters[0], $matches))
+                        {
+                            if(!empty($matches) && isset($matches[1]))
+                            {
+                                $arProperty = $arItem["PROPERTIES"][$matches[1]];
+                            }
+                        }
+                        // Если найдено свойство и его значение, применяем фильтр
+                        if (isset($arProperty["PROPERTY_TYPE"]) && count($arProperty["PROPERTY_TYPE"])>0)
+                        {
+                            // Обработчики типов: S - строка; N - число; L - список;
+                            if ($arProperty["PROPERTY_TYPE"]=="S" || $arProperty["PROPERTY_TYPE"]=="N" || ($arProperty["PROPERTY_TYPE"]=="L" && !is_array($arProperty["VALUE"])))
+                            {
+                                if ($arParamFilters[1] == "equal") { // равно
+                                    if (!(trim($arProperty["VALUE"]) == trim($arParamFilters[2]))) return false;
+                                } elseif ($arParamFilters[1] == "notequal") { // не равно
+                                    if (!(trim($arProperty["VALUE"]) != trim($arParamFilters[2]))) return false;
+                                } elseif ($arParamFilters[1] == "more") { // больше
+                                    if (!(intval($arProperty["VALUE"]) > intval($arParamFilters[2]))) return false;
+                                } elseif ($arParamFilters[1] == "less") { // меньше
+                                    if (!(intval($arProperty["VALUE"]) < intval($arParamFilters[2]))) return false;
+                                }
+                            }
+                            elseif ($arProperty["PROPERTY_TYPE"]=="L" && is_array($arProperty["VALUE"])) // фильтр по значениям списка (совпадает или не совпадает)
+                            {
+                                if ($arParamFilters[1] == "equal") { // равно
+                                    if (!in_array(trim($arParamFilters[2]), $arProperty["VALUE"])) return false;
+                                } elseif ($arParamFilters[1] == "notequal") { // не равно
+                                    if (in_array(trim($arParamFilters[2]), $arProperty["VALUE"])) return false;
+                                }
+                            }
+                        }
+
+                        // Фильтр по указанному складу
+                        $skladID = 0;
+                        if (preg_match("/^sklad@(.*?)/isU", $arParamFilters[0], $matches))
+                        {
+                            if(!empty($matches) && isset($matches[1]))
+                            {
+                                $skladID = intval($matches[1]);
+                                $arParamFilters[0] = "filter_quantity";
+                            }
+                        }
 
                         // Обработка каждого установленного фильтра
                         switch($arParamFilters[0])
@@ -4827,21 +5471,37 @@ class CMibixYandexExport
 
                                     // получаем параметры товара
                                     $arResProduct = CCatalogProduct::GetByID($tmpItemID);
+
+                                    // определяем количество товара на всех складах или на конкретно указанном
+                                    $productQuantity = 0;
+                                    if ($skladID > 0) // пользователь указал фильтр по конкретному складу
+                                    {
+                                        $arFilter = Array('PRODUCT_ID' =>$tmpItemID, 'STORE_ID' => $skladID);
+                                        $rsStore = CCatalogStoreProduct::GetList(array(), $arFilter, false, false, array('AMOUNT'));
+                                        if ($arStore = $rsStore->Fetch())
+                                        {
+                                            $productQuantity = $arStore['AMOUNT']; // Наличие на указанном складе
+                                        }
+                                    }
+                                    else // по всем складам
+                                    {
+                                        $productQuantity = $arResProduct["QUANTITY"];
+                                    }
                                     
                                     // фильтрация установленных пользователем значений
                                     switch($arParamFilters[1])
                                     {
                                         case "equal"; // равен
-                                            if(!(intval($arResProduct["QUANTITY"])==intval($arParamFilters[2]))) return false;
+                                            if(!(intval($productQuantity)==intval($arParamFilters[2]))) return false;
                                             break;
                                         case "notequal"; // не равен
-                                            if(!(intval($arResProduct["QUANTITY"])!=intval($arParamFilters[2]))) return false;
+                                            if(!(intval($productQuantity)!=intval($arParamFilters[2]))) return false;
                                             break;
                                         case "more";
-                                            if(!(intval($arResProduct["QUANTITY"])>intval($arParamFilters[2]))) return false;
+                                            if(!(intval($productQuantity)>intval($arParamFilters[2]))) return false;
                                             break;
                                         case "less";
-                                            if(!(intval($arResProduct["QUANTITY"])<intval($arParamFilters[2]))) return false;
+                                            if(!(intval($productQuantity)<intval($arParamFilters[2]))) return false;
                                             break;
                                         //case "empty";
                                         //case "notempty";
@@ -4993,6 +5653,61 @@ class CMibixYandexExport
     }
 }
 
+/**
+ * Класс с функциями тулзов, необходимых для модуля
+ * TODO: нужен рефакторинг
+ */
+class CMibixYandexTools
+{
+    /**
+     * Корректируем URL сайта, если в настройках выгрузки он бы указан не по формату
+     *
+     * @param $siteURL
+     * @return string
+     */
+    public static function getSiteURL($siteURL)
+    {
+        // Убираем на конце слэш если есть
+        if (substr($siteURL, -1) == '/')
+            $siteURL = substr($siteURL, 0, -1);
+
+        // Добавляем протокол, если не указан
+        if (!preg_match("~^(?:f|ht)tps?://~i", $siteURL))
+            $siteURL = "http://" . $siteURL;
+
+        return $siteURL;
+    }
+
+    /**
+     * Получаем корректный URL ссылки, в зависимости от переданных параметров
+     *
+     * @param $siteURL - адрес сайта
+     * @param $srcURL - путь к странице
+     * @param $urlEncode - нужно ли кодировать ссылку
+     * @return string - полный адрес в нужном формате
+     */
+    public static function getFixURL($siteURL, $srcURL, $urlEncode=true)
+    {
+        $siteURL = self::getSiteURL($siteURL);
+
+        // если url является относительным адресом
+        if(substr($srcURL, 0, 1) == "/" || !preg_match("/[^.]+\\.[^.]+$/", $srcURL))
+        {
+            $pageUrl = $srcURL;
+            if ($urlEncode)
+                $pageUrl = implode("/", array_map("rawurlencode", explode("/", $srcURL)));
+
+            if (substr($srcURL, 0, 1) == "/")
+                $strFile = $siteURL . $pageUrl;
+            else
+                $strFile = $siteURL . "/" . $pageUrl;
+        }
+        else
+            $strFile = $srcURL;
+
+        return $strFile;
+    }
+}
 
 
 ?>

@@ -14,6 +14,7 @@ $MESS["MIBIX_YAM_ERR_STEP_INTERVAL_RUN"] = "Параметр &quot;Количе�
 $MESS["MIBIX_YAM_ERR_DS_NAME_NULL"] = "Поле &quot;Название&quot; не может быть пустым.";
 $MESS["MIBIX_YAM_ERR_DS_NAME_LIMIT255"] = "Поле &quot;Название&quot; не может содержать более 255 символов.";
 $MESS["MIBIX_YAM_ERR_DS_IBLOCK_EMPTY"] = "&quot;Инфоблок&quot; должен быть выбран.";
+$MESS["MIBIX_YAM_ERR_DS_SHOP_EMPTY"] = "&quot;Профиль магазина&quot; должен быть выбран.";
 $MESS["MIBIX_YAM_ERR_DS_SELECTED_EMPTY"] = "Нужно выбрать хотя бы один элемент или раздел.";
 $MESS["MIBIX_YAM_ERR_RULE_DS_NULL"] = "Поле &quot;Источник данных&quot; должен быть выбран.";
 $MESS["MIBIX_YAM_ERR_RULE_NAME_RULE_NULL"] = "Поле &quot;Название для правила&quot; не может быть пустым.";
@@ -28,6 +29,10 @@ $MESS["MIBIX_YAM_ERR_RULE_INCLUDED"] = "Поле &quot;Что включено&q
 $MESS["MIBIX_YAM_ERR_RULE_TRANSPORT"] = "Поле &quot;Транспорт&quot; должно быть заполнено.";
 $MESS["MIBIX_YAM_ERR_RULE_PLACE"] = "Поле &quot;Место проведения&quot; должно быть заполнено.";
 $MESS["MIBIX_YAM_ERR_RULE_DATE"] = "Поле &quot;Дата и время сеанса&quot; должно быть заполнено.";
+
+$MESS["MIBIX_YAM_ERR_DO_COST"] = "Элемент &quot;cost&quot; в поле &quot;Параметры курьерской доставки&quot; должен быть заполнен и быть целым числом.";
+$MESS["MIBIX_YAM_ERR_DO_DAYS"] = "Элемент &quot;cost&quot; в поле &quot;Параметры курьерской доставки&quot; должен быть заполнен.";
+$MESS["MIBIX_YAM_ERR_DO_BEFORE"] = "Элемент &quot;order-before&quot; в поле &quot;Параметры курьерской доставки&quot; должен иметь значения от 0 до 24.";
 
 $MESS["MIBIX_YAM_IRU_SEL_CODE_NONE"] = "(не использовать)";
 $MESS["MIBIX_YAM_IRU_SEL_DS"] = "Выберите источник данных";
@@ -49,7 +54,11 @@ $MESS["MIBIX_YAM_IRU_SEL_FILTER_EMPTY"] = "пусто";
 $MESS["MIBIX_YAM_IRU_SEL_FILTER_NOTEMPTY"] = "не пусто";
 $MESS["MIBIX_YAM_IRU_SEL_FILTER_ADDNEW"] = "Добавить еще один фильтр";
 $MESS["MIBIX_YAM_IRU_SEL_FILTER_PRICE"] = "Цена";
-$MESS["MIBIX_YAM_IRU_SEL_FILTER_QUANTITY"] = "Количество на складе";
+$MESS["MIBIX_YAM_IRU_SEL_FILTER_SKLAD"] = "Количество на складе";
+$MESS["MIBIX_YAM_IRU_SEL_FILTER_QUANTITY"] = "Количество на складе (все)";
+$MESS["MIBIX_YAM_IRU_SEL_FILTER_GROUP_MAIN"] = "Основные фильтры";
+$MESS["MIBIX_YAM_IRU_SEL_FILTER_GROUP_SETTINGS"] = "Фильтры по свойствам инфоблока";
+$MESS["MIBIX_YAM_IRU_SEL_FILTER_GROUP_SETTINGS_SKU"] = "Фильтры по свойствам SKU";
 
 $MESS["MIBIX_YAM_IRU_SEL_SELVAL"] = "(Выберите значение)";
 $MESS["MIBIX_YAM_IRU_SEL_YCLASSIF"] = "Укажите классификацию";
@@ -62,6 +71,14 @@ $MESS["MIBIX_YAM_IRU_SEL_PARAMNAME"] = "название параметра";
 $MESS["MIBIX_YAM_IRU_SEL_PARAMUNIT"] = "ед.изм.";
 $MESS["MIBIX_YAM_IRU_SEL_PARAMVALUE"] = "(значение из свойства)";
 $MESS["MIBIX_YAM_IRU_SEL_ADDNEWPARAM"] = "Добавить еще один параметр";
+
+$MESS["MIBIX_YAM_IRU_SEL_DOCOST"] = "cost*";
+$MESS["MIBIX_YAM_IRU_SEL_DODAYS"] = "days*";
+$MESS["MIBIX_YAM_IRU_SEL_DOBEFORE"] = "order-before";
+
+$MESS["MIBIX_YAM_IRU_SEL_OLID"] = "id*";
+$MESS["MIBIX_YAM_IRU_SEL_OLINSTOCK"] = "instock";
+$MESS["MIBIX_YAM_IRU_SEL_OLBOOKING"] = "booking";
 
 $MESS["MIBIX_YAM_IRU_SEL_CODE_AVAILABLE_T"] = "[true] В наличии";
 $MESS["MIBIX_YAM_IRU_SEL_CODE_AVAILABLE_F"] = "[false] На заказ";

@@ -56,6 +56,9 @@ if($REQUEST_METHOD == "POST" && !empty($save) && $POST_RIGHT >= "W" && check_bit
         "agency"            => $f_agency,
         "email"             => $f_email,
         "local_delivery_cost" => $f_local_delivery_cost,
+        "do_cost"           => $f_do_cost,
+        "do_days"           => $f_do_days,
+        "do_before"         => $f_do_before,
         "cpa"               => ($f_cpa <> "1"? "0":"1"),
         "adult"             => ($f_adult <> "Y"? "N":"Y"),
         "utm"               => $f_utm,
@@ -96,10 +99,20 @@ if($REQUEST_METHOD == "POST" && !empty($save) && $POST_RIGHT >= "W" && check_bit
 
     if($res)
     {
-        LocalRedirect("/bitrix/admin/mibix.yamexport_general_settings.php?ID=".$ID."&mess=ok&lang=".LANG."&".$tabControl->ActiveTabParam());
+        // если сохранение прошло удачно - перенаправим на новую страницу
+        // (в целях защиты от повторной отправки формы нажатием кнопки "Обновить" в браузере)
+        if($apply!="")
+            LocalRedirect("/bitrix/admin/mibix.yamexport_general_settings.php?ID=".$ID."&mess=ok&lang=".LANG."&".$tabControl->ActiveTabParam());
+        else
+            LocalRedirect("/bitrix/admin/mibix.yamexport_general_list.php?lang=".LANG);
     }
     else
     {
+        // если в процессе сохранения возникли ошибки - получаем текст ошибки и меняем вышеопределённые переменные
+        if($e = $APPLICATION->GetException())
+        {
+            $message = new CAdminMessage(GetMessage("MIBIX_YAM_GENERAL_SET_SAVE_ERROR"), $e);
+        }
         $bVarsFromForm = true;
     }
 }
@@ -108,11 +121,13 @@ if($REQUEST_METHOD == "POST" && !empty($save) && $POST_RIGHT >= "W" && check_bit
 ClearVars();
 
 // Получаем записи с настройками из базы и заноси
-$generalModel = CMibixModelGeneral::GetById($ID);
-if(!$generalModel->ExtractFields("str_")) {
-    $ID=0;
-} else {
-    $ID = $str_id;
+if($ID > 0)
+{
+    $generalModel = CMibixModelGeneral::GetByID($ID);
+    if(!$generalModel->ExtractFields("str_"))
+    {
+        $ID=0;
+    }
 }
 
 // Если во время запроса добавить или обновить данные в таблице не получилось,
@@ -262,6 +277,19 @@ $tabControl->BeginNextTab();
             <div class="adm-info-message-wrap">
                 <div class="adm-info-message">
                     <?=GetMessage("MIBIX_YAM_GENERAL_DELIVERY_NOTE")?>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="40%" class="adm-detail-valign-top adm-detail-content-cell-l"><?=GetMessage("MIBIX_YAM_GENERAL_DELIVERYOPTIONS")?>:</td>
+        <td width="60%">
+            <input type="text" size="12" placeholder="cost" value="<?=$str_do_cost;?>" name="f_do_cost" />&nbsp;
+            <input type="text" size="12" placeholder="days" value="<?=$str_do_days;?>" name="f_do_days" />&nbsp;
+            <input type="text" size="12" placeholder="order-before" value="<?=$str_do_before;?>" name="f_do_before" />&nbsp;
+            <div class="adm-info-message-wrap">
+                <div class="adm-info-message">
+                    <?=GetMessage("MIBIX_YAM_GENERAL_DELIVERYOPTIONS_NOTE")?>
                 </div>
             </div>
         </td>

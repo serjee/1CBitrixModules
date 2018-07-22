@@ -1,0 +1,23 @@
+/*Menu icon*/
+#mibix_export_menu_icon {background-image:url('icons/mibix.export/menu.gif');}
+#mibix_export_page_icon {background-image:url('icons/mibix.export/title.gif');}
+
+.mibix_export_menu_icon {
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-image:url('icons/mibix.export/menu.png') !important;
+}
+.mibix_export_page_icon {
+    background-position:  center !important;
+    background-repeat: no-repeat !important;
+    background-image:url('icons/mibix.export/title.png') !important;
+}
+.aDelete {
+    margin:5px;
+    text-decoration:underline;
+    cursor:pointer;
+    color:#2747BF;
+}
+.dAdded {
+    margin-top:10px;
+}
